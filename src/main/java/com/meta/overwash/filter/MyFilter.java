@@ -7,6 +7,7 @@ import com.meta.overwash.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -32,10 +33,14 @@ public class MyFilter implements Filter {
 
     private final Environment env;
 
-    private UserService userService;
-    MyFilter(Environment env,UserService userService){
+//    private UserService userService;
+//    MyFilter(Environment env,UserService userService){
+//        this.env = env;
+//        this.userService =userService;
+//    };
+    MyFilter(Environment env){
         this.env = env;
-        this.userService =userService;
+
     };
 
 
@@ -44,7 +49,7 @@ public class MyFilter implements Filter {
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) request2;
         HttpServletResponse response = (HttpServletResponse) response2;
-
+        System.out.println("1111111111111111111111111");
         if (request.getHeader("AUTHORIZATION") == null) {
             onError(response, "UNAUTHORIZATION");
         } else {
@@ -55,25 +60,37 @@ public class MyFilter implements Filter {
                 onError(response, "UNAUTHORIZATION2");
             }
         }
-        String role = ((UserDTO)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getRole();
+        try {
+            System.out.println("11111111111111111");
+            Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String role = ((UserDTO)user).getRole();
         boolean check =true;
+            System.out.println(role);
+        String url = request.getRequestURI();
+            System.out.println(url);
+            System.out.println(url.contains("member"));
+        if(url.contains("member") && role.equals("ROLE_MEMBER")){
+            check = false;
+        }
+        if(url.contains("admin") && role.equals("ROLE_ADMIN")){
+            check = false;
+        }
+        if(url.contains("crew") &&  role.equals("ROLE_CREW")){
+            check = false;
+        }
+        if(!(url.contains("member") || url.contains("crew") || url.contains("admin"))
+        && !role.isEmpty()){
+            check = false;
+        }
 
-        if(request.getRequestURI().contains("member") && role.equals("ROLE_MEMBER")){
-            check = false;
-        }
-        if(request.getRequestURI().contains("admin") && role.equals("ROLE_ADMIN")){
-            check = false;
-        }
-        if(request.getRequestURI().contains("crew") &&  role.equals("ROLE_ADMIN")){
-            check = false;
-
-        }
-        if(request.getRequestURI().contains(""))
-        if(check){
+        if(true){
             throw new ForbiddenException("접근 권한이 없습니다.");
         }
-
         chain.doFilter(request2, response2);
+        }catch (Exception e){
+            new NotFoundException("유저의 정보가 존재하지 않습니다.");
+
+        }
 
     }
 
@@ -97,14 +114,14 @@ public class MyFilter implements Filter {
             }else{
                 String subject = claims.getSubject();
 
-                Collection<? extends GrantedAuthority> authorities =
-                        Arrays.stream(claims.get("auth").toString().split(","))
-                                .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList());
-                UserDetails principal= userService.getUser(subject);
-                Authentication authentication = new UsernamePasswordAuthenticationToken
-                        (principal, "", authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+//                Collection<? extends GrantedAuthority> authorities =
+//                        Arrays.stream(claims.get("auth").toString().split(","))
+//                                .map(SimpleGrantedAuthority::new)
+//                                .collect(Collectors.toList());
+//                UserDetails principal= userService.getUser(subject);
+//                Authentication authentication = new UsernamePasswordAuthenticationToken
+//                        (principal, "", authorities);
+//                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
         } catch (Exception e) {

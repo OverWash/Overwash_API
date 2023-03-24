@@ -2,6 +2,8 @@ package com.meta.overwash.security;
 
 
 import com.meta.overwash.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -9,6 +11,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
 
@@ -33,17 +38,20 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests().antMatchers("/login").permitAll();
         http.authorizeRequests().antMatchers("/error/**").permitAll();
-        http.authorizeRequests().antMatchers("/member/**").access("ROLE_MEMBER");
-        http.authorizeRequests().antMatchers("/crew/**").access("ROLE_CREW");
-        http.authorizeRequests().antMatchers("/admin/**").access("ROLE_ADMIN");
+//        http.authorizeRequests().antMatchers("/member/**").access("hasRole(ROLE_MEMBER)");
+//        http.authorizeRequests().antMatchers("/crew/**").access("hasRole(ROLE_CREW)");
+//        http.authorizeRequests().antMatchers("/admin/**").access("hasRole(ROLE_ADMIN)");
 
         http.authorizeRequests().antMatchers("/**")// 모든 요청
                 .hasIpAddress("127.0.0.1")
                 .and()
-                .addFilter(getAuthenticationFilter()); // 로그인을 거쳐야 함
+                .addFilter(getAuthenticationFilter())
+                ; // 로그인을 거쳐야 함
+
 
 
     }
+
 
     // 넘어오는 token 을 filter 로 생성
     private Filter getAuthenticationFilter() throws Exception {

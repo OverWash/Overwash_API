@@ -18,11 +18,10 @@ public class FilterConfig {
     @Bean
     public FilterRegistrationBean<MyFilter> filter1(){
         FilterRegistrationBean<MyFilter> myFilterBean =
-                new FilterRegistrationBean<>(new MyFilter(env,userService));
-        System.out.println(myFilterBean);
+                new FilterRegistrationBean<>(new MyFilter(env));
         myFilterBean.addUrlPatterns("/user2");
         myFilterBean.addUrlPatterns("/hello/*");
-        myFilterBean.addUrlPatterns("/test");
+        myFilterBean.addUrlPatterns("/member/1");
         myFilterBean.setOrder(0);
 
         return myFilterBean;

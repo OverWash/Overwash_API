@@ -34,7 +34,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         this.env = env;
     }
 
-    // 로그인 버튼을 누르는 순간 가장 먼저 호출되는 함수. 인증 요청
+      v// 로그인 버튼을 누르는 순간 가장 먼저 호출되는 함수. 인증 요청
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
