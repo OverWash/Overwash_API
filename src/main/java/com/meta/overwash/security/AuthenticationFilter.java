@@ -48,18 +48,17 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         }
     }
 
-    // 인증이 성공하면 호출되는 함수.
+    //로그인 인증이 성공하면 호출되는 함수.
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
         String username = ((UserDTO) authResult.getPrincipal()).getUsername();
-        System.out.println("username: " + username);
         UserDTO userDetail = userService.getUser(username);
 
         String token = Jwts.builder()
                 .setSubject(userDetail.getEmail())
-                .setSubject(userDetail.getRole())
+                .claim("auth",userDetail.getRole())
                 .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
