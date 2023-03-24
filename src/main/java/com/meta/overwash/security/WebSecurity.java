@@ -28,7 +28,9 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception { // 어떤 권한에 대해서 작업을 수행하고 싶을 때. 권한 처리 수행
+
         http.csrf().disable(); // csrf 토큰
+
         http.authorizeRequests().antMatchers("/login").permitAll();
         http.authorizeRequests().antMatchers("/error/**").permitAll();
         http.authorizeRequests().antMatchers("/member/**").access("ROLE_MEMBER");
@@ -46,7 +48,6 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     // 넘어오는 token 을 filter 로 생성
     private Filter getAuthenticationFilter() throws Exception {
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), userService,env);
-
         return authenticationFilter;
     }
 
