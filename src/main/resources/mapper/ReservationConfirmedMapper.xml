@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.ReservationConfirmedMapper">
+
+	<resultMap type="ReservationConfirmedDTO" id="getConfirm">
+		<id property="confirmId" column="confirm_id" />
+		<result property="confirmDate" column="CONFIRM_DATE" />
+		<association property="reservation" resultMap="getReservation" />
+	</resultMap>
+
+	<resultMap type="ReservationDTO" id="getReservation">
+		<id property="reservationId" column="reservation_id" />
+		<result property="reservationStatus" column="RESERVATION_STATUS" />
+		<association property="member" resultMap="getMember" />
+	</resultMap>
+
+	<resultMap type="MemberDTO" id="getMember">
+		<id property="memberId" column="member_id"/>
+		<result property="memberAddress" column="MEMBER_ADDRESS"/>
+		<result property="memberContact" column="MEMBER_CONTACT"/>
+		<result property="nickname" column="nickname"/>
+		<!-- <result property="userId" column="user_id"/> -->
+	</resultMap>
+
+	<insert id="insertReservationConfirm">
+		<selectKey keyProperty="confirmId" resultType="Long" order="BEFORE">
+			SELECT RESERVATION_CONFIRMED_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO RESERVATION_CONFIRMED
+		VALUES(
+		#{confirmId},
+		SYSDATE,
+		#{factory.factoryId},
+		#{crew.crewId},
+		#{reservation.reservationId}
+		)
+	</insert>
+
+	<select id="getReservationConfirm" resultMap="getConfirm">
+		SELECT
+		confirm_id,
+		confirm_date,
+		R.reservation_id as reservation_id,
+		reservation_status,
+		member_contact,
+		nickname
+		FROM
+		RESERVATION_CONFIRMED RC,
+		RESERVATION R,
+		MEMBER M
+		WHERE
+		RC.RESERVATION_ID = R.RESERVATION_ID AND
+		R.MEMBER_ID = M.MEMBER_ID AND
+		confirm_Id = #{confirmId}
+
+	</select>
+
+	<select id="getList" resultMap="getConfirm">
+
+		SELECT
+				CONFIRM_ID,
+				CONFIRM_DATE,
+				RESERVATION_ID,
+				COLLECT_DATE,
+				RESERVATION_DATE,
+				REQUEST,
+				RESERVATION_STATUS,
+				member_contact,
+				nickname
+		FROM
+				(SELECT
+						ROWNUM RN,
+						RC.CONFIRM_ID,
+						RC.CONFIRM_DATE,
+						R.COLLECT_DATE,
+						R.RESERVATION_ID,
+						R.RESERVATION_DATE,
+						R.REQUEST,
+						R.RESERVATION_STATUS,
+						M.member_contact,
+						M.nickname
+				FROM
+						RESERVATION_CONFIRMED RC
+						JOIN
+						RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
+						JOIN
+						MEMBER M ON M.MEMBER_ID = R.MEMBER_ID
+						WHERE 
+			<![CDATA[
+						ROWNUM < = #{pageNum} * #{amount}
+						AND
+						RESERVATION_STATUS LIKE '%'||'예약확정'||'%']]>
+		<if test="userId !=null">
+			AND user_id = #{userId}
+		</if>
+		)
+		WHERE
+		RN > (#{pageNum}-1) * #{amount}
+
+	</select>
+
+	<select id="getCount" resultType="Long">
+		SELECT
+		COUNT(*)
+		FROM
+		RESERVATION_CONFIRMED RC
+		JOIN
+		RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
+
+		<if test="userId !=null">
+			JOIN
+			MEMBER M ON M.MEMBER_ID = R.MEMBER_ID
+		</if>
+		WHERE
+		RESERVATION_STATUS LIKE '%'||'예약확정'||'%'
+
+		<if test="userId !=null">
+			AND user_Id = #{userId}
+		</if>
+
+	</select>
+	
+	<!-- 결제완료에 대한 정보  -->
+	<select id="getListByPaymentComplete" resultMap="getConfirm">
+		SELECT *
+		FROM
+		RESERVATION_CONFIRMED RC
+		JOIN
+		RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
+		JOIN MEMBER M ON R.MEMBER_ID = M.MEMBER_ID
+		WHERE
+		R.RESERVATION_STATUS LIKE '%'||'결제완료'||'%'
+	</select>
+
+</mapper>

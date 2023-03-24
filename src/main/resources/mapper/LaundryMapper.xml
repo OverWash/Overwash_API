@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.LaundryMapper">
+
+	<resultMap type="LaundryDTO" id="LaundryMap">
+		<id property="laundryId" column="laundry_id" />
+		<result property="name" column="name" />
+		<result property="type" column="type" />
+		<association property="laundryPrice" resultMap="priceMap" />
+	</resultMap>
+
+	<resultMap type="LaundryPriceDTO" id="priceMap">
+		<id property="priceId" column="price_id" />
+		<result property="price" column="price" />
+	</resultMap>
+
+	<select id="getList" resultMap="LaundryMap">
+		<![CDATA[
+			SELECT	l.name, lp.price , l.type, l.laundry_id,lp.price_id
+			FROM	laundry l, laundry_price lp
+			WHERE	l.price_id = lp.price_id
+		]]>
+	</select>
+
+	<select resultType="Long" id="getLaundryCnt">
+		SELECT COUNT(*) FROM LAUNDRY
+	</select>
+
+</mapper>

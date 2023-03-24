@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.ReceiptMapper">
+
+	<insert id="insertReceipt" parameterType="ReceiptDTO">
+		<selectKey resultType="long" order="BEFORE" keyProperty="receiptId">
+			SELECT receipt_seq.nextval FROM dual
+		</selectKey>
+		INSERT INTO receipt
+			(receipt_id, payment_method, pr_id)
+		VALUES
+			(#{receiptId}, #{paymentMethod}, #{pr.prId})
+	</insert>
+
+	<!-- 영수증 번호로 영수증 하나를 가져옴 -->
+	<select id="getReceipt" parameterType="long" resultMap="receiptMap">
+		SELECT 
+			rec.receipt_id, rec.payment_method, 
+			p.pr_id, p.pr_price,
+			r.reservation_id, r.reservation_date,
+			rc.confirm_id, rc.confirm_date,
+			c.crew_contact
+		FROM
+			receipt rec
+		JOIN 
+			payment_request p ON rec.pr_id = p.pr_id
+		JOIN
+			reservation_confirmed rc ON p.confirm_id = rc.confirm_id
+		JOIN
+			crew c ON rc.crew_id = c.crew_id
+		JOIN
+			reservation r ON r.reservation_id = rc.reservation_id
+		WHERE 
+			rec.receipt_id = #{receiptId}
+	</select>
+
+	<!-- 회원이 보유한 영수증 리스트 -->
+	<select id="getReceiptList" parameterType="long" resultMap="receiptMap">
+		SELECT 
+			rec.receipt_id, rec.payment_method, 
+			p.pr_id, p.pr_price,
+			r.reservation_id, r.reservation_date,
+			rc.confirm_id, rc.confirm_date,
+			c.crew_contact
+		FROM
+			receipt rec
+		JOIN 
+			payment_request p ON rec.pr_id = p.pr_id
+		JOIN
+			reservation_confirmed rc ON p.confirm_id = rc.confirm_id
+		JOIN
+			crew c ON rc.crew_id = c.crew_id
+		JOIN
+			reservation r ON r.reservation_id = rc.reservation_id
+		JOIN
+			member m ON m.member_id = r.member_id
+		WHERE
+			m.user_id = #{userId}
+	</select>
+	
+	<!-- 회원이 보유한 영수증 중 예약상태가 '배달완료'인 리스트 -->
+	<select id="getDeliveryCompletedList" parameterType="long" resultMap="receiptMap">
+		SELECT 
+			rec.receipt_id, rec.payment_method, 
+			p.pr_id, p.pr_price,
+			r.reservation_id, r.reservation_date, r.reservation_status,
+			rc.confirm_id, rc.confirm_date,
+			c.crew_contact
+		FROM
+			receipt rec
+		JOIN 
+			payment_request p ON rec.pr_id = p.pr_id
+		JOIN
+			reservation_confirmed rc ON p.confirm_id = rc.confirm_id
+		JOIN
+			crew c ON rc.crew_id = c.crew_id
+		JOIN
+			reservation r ON r.reservation_id = rc.reservation_id
+		JOIN
+			member m ON m.member_id = r.member_id
+		WHERE
+			m.user_id = #{userId}
+		AND
+			r.reservation_status LIKE  '%'||'배달완료'||'%'
+	</select>
+	
+	
+
+	<resultMap type="ReceiptDTO" id="receiptMap">
+		<id property="receiptId" column="receipt_id" />
+		<result property="paymentMethod" column="payment_method" />
+		<association property="pr" resultMap="prMap" />
+	</resultMap>
+
+	<resultMap type="PaymentRequestDTO" id="prMap">
+		<id property="prId" column="pr_id" />
+		<result property="prPrice" column="pr_price" />
+		<association property="confirm" resultMap="confirmMap" />
+	</resultMap>
+
+	<resultMap type="ReservationConfirmedDTO" id="confirmMap">
+		<id property="confirmId" column="confirm_id" />
+		<result property="confirmDate" column="confirm_date" />
+		<association property="crew" resultMap="crewMap" />
+		<association property="reservation" resultMap="reservationMap" />
+	</resultMap>
+
+	<resultMap type="CrewDTO" id="crewMap">
+		<id property="crewId" column="crew_id" />
+		<result property="crewContact" column="crew_contact" />
+	</resultMap>
+
+	<resultMap type="ReservationDTO" id="reservationMap">
+		<id property="reservationId" column="reservation_id" />
+		<result property="reservationDate" column="reservation_date" />
+	</resultMap>
+	
+	<resultMap type="MemberDTO" id="memberMap">
+      <id property="memberId" column="member_Id" />
+      <result property="memberAddress" column="member_address" />
+      <result property="memberContact" column="member_contact" />
+      <result property="nickname" column="nickname" />
+   </resultMap>
+
+</mapper>  

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.WashingCompleteMapper">
+<!-- ResultMap -->
+	<resultMap type="WashingCompleteDTO" id="WashingCompleteMap">
+		<id property="wcId" column="wc_id"/>
+		<result property="wcDate" column="wc_date"/>
+		<association property="confirm" resultMap="reservationConfirmedMap"/>
+	</resultMap>
+
+	<resultMap type="ReservationConfirmedDTO" id="reservationConfirmedMap">
+		<id property="confirmId" column="confirm_id"/>
+		<result property="confirmDate" column="confirm_date"/>
+		<association property="factory" resultMap="LaundryFactoryMap"/>
+		<association property="crew" resultMap="crewMap"/>
+		<association property="reservation" resultMap="reservationMap"/>
+	</resultMap>
+
+	<resultMap type="LaundryFactoryDTO" id="LaundryFactoryMap">
+		<id property="factoryId" column="factory_id"/>
+		<result property="factoryContact" column="factory_contact"/>
+		<result property="factoryAddress" column="factory_address"/>
+	</resultMap>
+
+	<resultMap type="ReservationDTO" id="reservationMap">
+		<id property="reservationId" column="reservation_id"/>
+		<result property="collectDate" column="collect_date"/>
+		<result property="reservationDate" column="reservation_date"/>
+		<result property="request" column="request"/>
+		<result property="reservationStatus" column="reservation_status"/>
+		<association property="member" resultMap="memberMap"/>
+	</resultMap>
+
+	<resultMap type="MemberDTO" id="memberMap">
+		<id property="memberId" column="member_id"/>
+		<result property="memberAddress" column="member_address"/>
+		<result property="memberContact" column="member_contact"/>
+		<result property="nickname" column="nickname"/>
+		<association property="user" resultMap="userMap"/>
+	</resultMap>
+
+	<resultMap type="UserDTO" id="userMap">
+		<result column="user_id" property="userId"/>
+		<result column="email" property="email"/>
+		<result column="password" property="password"/>
+	</resultMap>
+
+	<resultMap type="CrewDTO" id="crewMap">
+		<result column="crew_id" property="crewId"/>
+		<result column="crew_contact" property="crewContact"/>
+		<result column="crew_name" property="crewName"/>
+		<result column="crew_birth" property="crewBirth"/>
+		<result column="car_type" property="carType"/>
+		<result column="car_number" property="carNumber"/>
+		<association property="user" resultMap="userMap"/>
+	</resultMap>
+
+<!-- ResultMap -->
+	<insert id="insertWashingComplete" parameterType="WashingCompleteDTO">
+		<selectKey resultType="long" order="BEFORE" keyProperty="wcId">
+			SELECT WASHING_COMPLETE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO WASHING_COMPLETE
+		VALUES(
+		#{wcId},
+		SYSDATE,
+		#{confirm.confirmId}
+		)
+	</insert>
+
+	<select id="selectDelivery" resultMap="WashingCompleteMap">
+		select
+         wc.wc_id              as wc_id,
+         wc.wc_date           as wc_date,
+         rc.confirm_id         as confirm_id,
+         rc.confirm_date       as confirm_date,
+         f.factory_id         as factory_id,
+         f.factory_contact    as factory_contact,
+         f.factory_address    as factory_address,
+         c.crew_id            as crew_id,
+         c.crew_contact       as crew_contact,
+         c.crew_name          as crew_name,
+         c.car_type          as car_type,
+         c.car_number       as car_number,
+         r.reservation_id      as reservation_id,
+         r.collect_date       as collect_date,
+         r.reservation_date    as reservation_date,
+         r.request            as request,
+         r.reservation_status as reservation_status,
+         m.member_id          as member_id,
+         m.member_address     as member_address,
+         m.member_contact     as member_contact,
+         m.nickname          as nickname
+      from
+         washing_complete wc
+                       join reservation_confirmed rc       
+                         on wc.confirm_id = rc.confirm_id
+                       join reservation r
+                         on rc.reservation_id = r.reservation_id
+                       join laundry_factory f
+                         on rc.factory_id = f.factory_id
+                       join crew c
+                         on rc.crew_id = c.crew_id
+                       join member m
+                         on r.member_id = m.member_id
+      where
+         r.reservation_status in ('세탁완료', '배달중')
+	</select>
+
+
+</mapper>

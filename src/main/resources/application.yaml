@@ -1,0 +1,28 @@
+server:
+  port: 8100
+
+logging:
+  level:
+    org.springframework: DEBUG
+
+spring:
+  messages:
+    basename: message
+
+  datasource:
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    url: jdbc:oracle:thin:@localhost:1521:XE
+    username: laundry3
+    password: 1234
+  h2:
+    console:
+      enabled: true
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.meta.overwash.domain
+
+
+token:
+  expiration_time : 3600
+  secret: user

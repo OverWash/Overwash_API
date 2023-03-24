@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.UserMapper">
+
+
+	<insert id="insertUser">
+
+		insert into users
+		(user_id, email, password, role)
+		values
+		(users_seq.nextval, #{email}, #{password}, #{role})
+
+		<selectKey keyProperty="userId" order="AFTER" resultType="long">
+			select users_seq.currval from dual
+		</selectKey>
+
+	</insert>
+
+	<!-- 계정 비활성화 -->
+	<delete id="deleteUser">
+		update users
+		set
+			enabled = 0
+		where
+			user_id = #{userId}
+	</delete>
+
+	<!-- 비밀번호 수정 -->
+	<update id="updateUser">
+		update users
+		set
+			password = #{password}
+		where
+			user_id = #{userId}
+	</update>
+	
+	<!-- 이메일로 스프링 시큐리티 검사 -->
+	<select id="getUser" resultType="UserDTO">
+		select * 
+			from users 
+		where
+			email = #{email}
+	</select>
+	
+	<!-- userId로 user 검색 -->
+	<select id="getUserById" resultType="UserDTO">
+		select * 
+			from users 
+		where
+			user_id = #{userId}
+	</select>
+
+</mapper>

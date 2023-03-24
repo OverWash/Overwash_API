@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.meta.overwash.mapper.PaymentRequestMapper">
+	<resultMap type="PaymentRequestDTO" id="PrMap">
+		<id property="prId" column="pr_id" />
+		<result property="prPrice" column="pr_price" />
+		<association property="confirm" resultMap="confirmMap"></association>
+	</resultMap>
+
+	<resultMap type="ReservationConfirmedDTO" id="confirmMap">
+		<id property="confirmId" column="confirm_id" />
+		<result property="confirmDate" column="confirm_date" />
+		<association property="factory" resultMap="factoryMap" />
+		<association property="crew" resultMap="crewMap" />
+		<association property="reservation" resultMap="reservationMap" />
+	</resultMap>
+
+	<resultMap type="LaundryFactoryDTO" id="factoryMap">
+		<id property="factoryId" column="factory_Id" />
+		<result property="factoryContact" column="factory_Contact" />
+		<result property="factoryAddress" column="factory_Address" />
+	</resultMap>
+
+	<resultMap type="CrewDTO" id="crewMap">
+		<id property="crewId" column="crew_id" />
+		<result property="crewBirth" column="crew_birth" />
+		<result property="carType" column="car_type" />
+		<result property="crewContact" column="crew_contact"/>
+		<result property="crewName" column="crew_name"/>
+		<result property="carNumber" column="car_number" />
+	</resultMap>
+
+	<resultMap type="ReservationDTO" id="reservationMap">
+		<id property="reservationId" column="reservation_Id" />
+		<result property="collectDate" column="collect_date" />
+		<result property="request" column="request" />
+		<result property="reservationDate" column="reservation_date"/>
+		<result property="reservationStatus" column="reservation_status" />
+		<association property="member" resultMap="memberMap" />
+	</resultMap>
+
+	<resultMap type="MemberDTO" id="memberMap">
+		<id property="memberId" column="member_Id" />
+		<result property="memberAddress" column="member_address" />
+		<result property="memberContact" column="member_contact" />
+		<result property="nickname" column="nickname" />
+	</resultMap>
+
+	<!-- 테스트 쿼리 -->
+	<!-- <insert id="insertPaymentRequest"> <selectKey keyProperty="prId" order="BEFORE" resultType="Long"> SELECT PAYMENT_REQUEST_SEQ.NEXTVAL FROM DUAL </selectKey> INSERT INTO payment_request(pr_id,pr_price <if test="confirm != null"> ,confirm_id </if> ) VALUES ( #{prId}, #{prPrice} <if test="confirm != null"> ,#{confirm.confirmId} </if> ) </insert> -->
+
+	<!-- 실제 사용할 쿼리 -->
+	<insert id="insertPaymentRequest">
+		<selectKey keyProperty="prId" order="BEFORE" resultType="Long"> SELECT PAYMENT_REQUEST_SEQ.NEXTVAL FROM DUAL </selectKey>
+		INSERT INTO payment_request(pr_id,pr_price,confirm_id) VALUES ( #{prId}, #{prPrice}, #{confirm.confirmId})
+	</insert>
+
+	<select id="getPaymentRequest" resultType="PaymentRequestDTO">
+		SELECT
+		m.member_id, member_address,member_contact,nickname,
+		r.reservation_id,collect_date,reservation_date,request,reservation_status,
+		rc.confirm_id,confirm_date,rc.factory_id,rc.crew_id,
+		factory_contact,factory_address,
+		crew_contact,crew_name,crew_birth,car_type,car_number,
+		pr_id,pr_price
+		FROM
+		MEMBER M
+		JOIN
+		RESERVATION R ON M.MEMBER_ID = R.MEMBER_ID
+		JOIN
+		RESERVATION_CONFIRMED RC ON R.RESERVATION_ID = RC.RESERVATION_ID
+		JOIN
+		PAYMENT_REQUEST PR ON PR.CONFIRM_ID = RC.CONFIRM_ID
+		JOIN
+		CREW C ON C.CREW_ID = RC.CREW_ID
+		JOIN
+		LAUNDRY_FACTORY F ON F.FACTORY_ID = RC.FACTORY_ID
+		WHERE
+		PR.PR_ID = #{prId}
+	</select>
+
+	<select id="getListToAdmin" resultMap="PrMap">
+	<![CDATA[
+		SELECT 
+				member_address, 
+			    member_contact,
+			    nickname,
+			    collect_date,
+			    reservation_date,
+			    reservation_status,
+			    confirm_date,
+			    crew_contact,
+			    crew_name,
+			    pr_price
+		FROM
+				(SELECT 
+						ROWNUM RN, 
+						member_address, 
+					    member_contact,
+					    nickname,
+					    collect_date,
+					    reservation_date,
+					    reservation_status,
+					    confirm_date,
+					    crew_contact,
+					    crew_name,
+					    pr_price
+				 FROM
+							MEMBER M
+					JOIN 
+							RESERVATION R ON M.MEMBER_ID = R.MEMBER_ID
+					JOIN 
+							RESERVATION_CONFIRMED RC ON R.RESERVATION_ID = RC.RESERVATION_ID
+					JOIN 
+							PAYMENT_REQUEST PR ON PR.CONFIRM_ID = RC.CONFIRM_ID
+					JOIN
+							CREW C ON C.CREW_ID = RC.CREW_ID
+					JOIN
+							LAUNDRY_FACTORY F ON F.FACTORY_ID = RC.FACTORY_ID
+					WHERE 
+							ROWNUM < = #{pageNum} * #{amount}
+  		 		 )
+  		 WHERE 
+  		 		 RN > (#{pageNum}-1) * #{amount}
+	]]>
+	</select>
+
+	<select id="getCountToAdmin" resultType="Long">
+		SELECT
+				COUNT(*)
+		FROM
+				PAYMENT_REQUEST pr
+		JOIN
+				RESERVATION_CONFIRMED rc ON pr.CONFIRM_ID = rc.CONFIRM_ID
+		JOIN
+				RESERVATION r ON r.reservation_Id = rc. reservation_Id
+	</select>
+
+	<select id="getListToMember" resultMap="PrMap" parameterType="HashMap">
+		<![CDATA[
+		SELECT 				  
+							   member_address,
+							   member_contact,
+							   nickname,
+							   collect_date,
+							   reservation_date,
+							   reservation_status,
+							   confirm_date,
+							   crew_contact,
+							   crew_name,
+							   pr_price
+      	 FROM
+					(SELECT 
+							  ROWNUM RN,
+							   member_address, 
+							   member_contact,
+							   nickname,
+							   collect_date,
+							   reservation_date,
+							   reservation_status,
+							   confirm_date,
+							   crew_contact,
+							   crew_name,
+							   pr_price
+					FROM
+							MEMBER M
+					JOIN 
+							RESERVATION R ON M.MEMBER_ID = R.MEMBER_ID
+					JOIN 
+							RESERVATION_CONFIRMED RC ON R.RESERVATION_ID = RC.RESERVATION_ID
+					JOIN 
+							PAYMENT_REQUEST PR ON PR.CONFIRM_ID = RC.CONFIRM_ID
+					JOIN
+							CREW C ON C.CREW_ID = RC.CREW_ID
+					JOIN
+							LAUNDRY_FACTORY F ON F.FACTORY_ID = RC.FACTORY_ID
+					WHERE 
+							ROWNUM < = #{pageNum} * #{amount}
+							AND
+							M.USER_ID = #{userId}
+							AND 
+							RESERVATION_STATUS LIKE '%'||'검수완료'||'%'
+					)
+		WHERE RN > (#{pageNum}-1) * #{amount}
+	]]>
+	</select>
+	
+	<select id="getPrListToMemberNotPaging" resultMap="PrMap">
+      SELECT  
+            PR.PR_ID,
+            R.RESERVATION_DATE,
+            RC.CONFIRM_DATE,
+            PR.PR_PRICE,
+            R.RESERVATION_ID,
+            RC.CONFIRM_ID          
+      FROM
+            PAYMENT_REQUEST PR 
+      JOIN   RESERVATION_CONFIRMED RC ON PR.CONFIRM_ID = RC.CONFIRM_ID
+      JOIN   RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
+      JOIN   MEMBER M ON M.MEMBER_ID = R.MEMBER_ID
+      WHERE
+            M.USER_ID = #{userId}
+     		AND 
+			RESERVATION_STATUS LIKE '%'||'검수완료'||'%'
+   </select>
+	
+
+	<select id="getCountToMember" resultType="Long">
+		SELECT
+				COUNT(*)
+		FROM
+				PAYMENT_REQUEST pr
+		JOIN
+				RESERVATION_CONFIRMED rc ON pr.CONFIRM_ID = rc.CONFIRM_ID
+		JOIN
+				RESERVATION r ON r.reservation_Id = rc. reservation_Id
+		JOIN 
+				MEMBER m ON m.MEMBER_ID = r.MEMBER_ID
+		WHERE
+				RESERVATION_STATUS LIKE '%'||'검수완료'||'%'
+				AND
+				user_Id = #{userId}
+	</select>
+	<!-- 예약일 
+		결제번호
+		예약확정일
+		총금액
+		예약번호
+	 -->
+	<select id="getListToMemberNotPaging" resultType="PaymentRequestDTO">
+		SELECT  
+				PR.PR_ID,
+				R.RESERVATION_DATE,
+				RC.CONFIRM_DATE,
+				PR.PR_PRICE,
+				R.RESERVATION_ID				
+		FROM
+				PAYMENT_REQUEST PR 
+		JOIN	RESERVATION_CONFIRMED RC ON PR.CONFIRM_ID = RC.CONFIRM_ID
+		JOIN	RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
+		JOIN	MEMBER M ON M.MEMBER_ID = R.MEMBER_ID
+		WHERE
+				M.USER_ID = #{userId}
+				 
+				
+	</select>
+</mapper>

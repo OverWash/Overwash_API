@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.ReservationMapper">
+
+
+	<update id="updateReservation">
+		UPDATE RESERVATION SET RESERVATION_STATUS = #{reservationStatus}
+		WHERE RESERVATION_ID = #{reservationId}
+	</update>
+
+	<resultMap type="WashingCompleteDTO" id="WashingCompleteMap">
+		<id property="wcId" column="wc_id" />
+		<result property="wcDate" column="wc_date" />
+		<association property="confirm"
+			resultMap="reservationConfirmedMap" />
+	</resultMap>
+
+	<resultMap type="ReservationConfirmedDTO"
+		id="reservationConfirmedMap">
+		<id property="confirmId" column="confirm_id" />
+		<result property="confirmDate" column="confirm_date" />
+		<association property="factory" column="laundryFactoryMap" />
+		<association property="crew" resultMap="crewMap" />
+		<association property="reservation"
+			resultMap="reservationMap" />
+	</resultMap>
+
+	<resultMap type="LaundryFactoryDTO" id="laundryFactoryMap">
+		<id property="factoryId" column="factory_id" />
+		<result property="factoryContact" column="factory_contact" />
+		<result property="factoryAddress" column="factory_address" />
+	</resultMap>
+
+	<resultMap type="CrewDTO" id="crewMap">
+		<id property="crewId" column="crew_id" />
+		<result property="crewBirth" column="crew_birth" />
+		<result property="crewContact" column="crew_contact" />
+		<result property="crewName" column="crew_name" />
+		<association property="reservation"
+			resultMap="reservationMap" />
+	</resultMap>
+
+	<resultMap type="ReservationDTO" id="reservationMap">
+		<id property="reservationId" column="reservation_id"/>
+		<result property="collectDate" column="collect_date"/>
+		<result property="reservationDate" column="reservation_date"/>
+		<result property="request" column="request"/>
+		<result property="reservationStatus" column="reservation_status"/>
+		<association property="member" resultMap="memberMap"/>
+	</resultMap>
+
+	<resultMap type="MemberDTO" id="memberMap">
+		<id property="memberId" column="member_id" />
+		<result property="memberAddress" column="member_address" />
+		<result property="memberContact" column="member_contact" />
+		<result property="nickname" column="nickname" />
+		<association property="user" resultMap="userMap" />
+	</resultMap>
+
+	<resultMap type="UserDTO" id="userMap">
+		<id property="userId" column="user_id" />
+		<result property="email" column="email" />
+	</resultMap>
+
+	<select id="getList" resultMap="reservationMap">
+	  <![CDATA[
+	  	SELECT DISTINCT r.reservation_id, r.collect_date, r.reservation_date, r.request, 
+	  		r.reservation_status
+	  	FROM
+	  		reservation r, member m
+	  	WHERE
+	  		r.reservation_id > 0
+	  ]]>
+	</select>
+
+	<select id="getListEach" resultMap="reservationMap">
+	  <![CDATA[
+		  	SELECT DISTINCT r.reservation_id, r.collect_date, r.reservation_date, r.request, 
+		  		r.reservation_status, u.email
+		  	FROM
+		  		reservation r, member m, users u
+		  	WHERE
+		  		r.reservation_id > 0
+		  	AND
+		  		#{member.memberId} = r.member_id
+	  ]]>
+	</select>
+ 
+	<select id="getListEachOne" resultType="ReservationDTO">
+		<![CDATA[
+		  	SELECT DISTINCT r.reservation_id, r.collect_date, r.reservation_date, r.request, 
+		  		r.reservation_status
+		  	FROM
+		  		Reservation R, MEMBER M, users u, users u2
+			WHERE
+			r.Reservation_id > 0
+		]]>
+			AND
+                u.email = #{member.user.email}
+		  	AND
+		  		u.email = u2.email
+            AND 
+                r.member_id = u.user_id
+            AND
+                r.reservation_id = #{reservationId}
+	</select>
+
+	<select id="getListByMember" resultMap="reservationMap">
+		<![CDATA[
+			SELECT DISTINCT r.reservation_id, r.collect_date, r.reservation_date, r.request, 
+		  		r.reservation_status
+		  	FROM
+		  		reservation r
+		  	WHERE
+		  		r.reservation_id > 0
+		]]>
+            AND
+                r.member_id = #{memberId}
+            ORDER BY
+				r.reservation_date DESC
+                
+	</select>
+
+
+	<select id="getListCheckComplete" resultMap="reservationMap"
+		parameterType="ReservationDTO">
+	  <![CDATA[
+	  	SELECT DISTINCT r.reservation_id, r.collect_date, r.reservation_date, r.request, 
+	  		r.reservation_status
+	  	FROM
+	  		RESERVATION r, member m
+	  	WHERE
+	  		r.RESERVATION_ID > 0
+	  	AND
+	  		#{memberId} = r.member_id
+	  	AND
+	  		r.reservation_status = '검수완료'
+	  ]]>
+	</select>
+
+	<update id="updateReservationStatus" parameterType="ReservationDTO">
+		UPDATE reservation
+		SET reservation_status = #{reservationStatus},
+			collect_date = SYSDATE
+		WHERE reservation_id = #{reservationId}
+	</update>
+
+	<insert id="insertReservation" parameterType="ReservationDTO">
+		INSERT INTO
+		reservation
+		VALUES (reservation_seq.nextval, #{collectDate}, SYSDATE,
+		#{request}, '주문접수', #{member.memberId})
+	</insert>
+
+	<insert id="insertReservationConfirmed"
+		parameterType="ReservationConfirmedDTO">
+		INSERT INTO reservation_confirmed
+		VALUES
+		(reservation_seq.nextval, SYSDATE, #{factoryId},
+		#{crew.crewId},
+		#{reservation.reservationId})
+	</insert>
+
+	<insert id="insertWashingComplete"
+		parameterType="WashingCompleteDTO">
+		INSERT INTO washing_complete
+		VALUES
+		(WASHING_COMPLETE_SEQ.nextval, SYSDATE, #{confirm.confirmId})
+	</insert>
+
+	<select id="getReservation" resultMap="reservationMap">
+	SELECT *
+	FROM RESERVATION R
+		 JOIN MEMBER M
+		   ON R.MEMBER_ID = M.MEMBER_ID
+	WHERE RESERVATION_ID = #{reservationId}
+	</select>
+
+</mapper>

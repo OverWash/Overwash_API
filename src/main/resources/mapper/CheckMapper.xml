@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.meta.overwash.mapper.CheckMapper">
+
+	<resultMap id="checkMap" type="CheckDTO">
+		<association property="laundry" resultMap="laundryMap" />
+	</resultMap>
+
+	<resultMap type="LaundryDTO" id="laundryMap">
+		<result property="name" column="name"/>
+		<association property="laundryPrice" resultMap="priceMap" />
+	</resultMap>
+
+	<resultMap type="LaundryPriceDTO" id="priceMap">
+		<id property="priceId" column="price_Id" />
+		<result property="price" column="price" />
+	</resultMap>
+
+	<insert id="insertCheck">
+		<selectKey keyProperty="checkId" order="BEFORE" resultType="Long">
+			SELECT CHECK_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO "CHECK"
+		VALUES(
+		#{checkId},
+		#{confirm.confirmId},
+		#{laundry.laundryId}
+		)
+	</insert>
+
+
+	<select id="getListByConfirmId" resultMap="checkMap">
+		SELECT
+		L.name , LP.PRICE
+		FROM
+		"CHECK" C
+		JOIN
+		LAUNDRY L ON C.LAUNDRY_ID = L.LAUNDRY_ID
+		JOIN
+		LAUNDRY_PRICE LP ON L.PRICE_ID = LP.PRICE_ID
+		WHERE
+		CONFIRM_ID = #{confirmId}
+
+	</select>
+</mapper>
