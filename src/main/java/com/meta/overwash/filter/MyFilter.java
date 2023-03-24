@@ -32,7 +32,7 @@ public class MyFilter implements Filter {
 
     private final Environment env;
 
-    private UserService userService;
+    private final UserService userService;
     MyFilter(Environment env,UserService userService){
         this.env = env;
         this.userService =userService;
@@ -68,7 +68,8 @@ public class MyFilter implements Filter {
             check = false;
 
         }
-        if(request.getRequestURI().contains(""))
+//        if(!(request.getRequestURI().contains("member") ||request.getRequestURI().contains("admin")||request.getRequestURI().contains("crew") )
+//        && role.isEmpty())
         if(check){
             throw new ForbiddenException("접근 권한이 없습니다.");
         }

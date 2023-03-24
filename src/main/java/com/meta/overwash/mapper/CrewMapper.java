@@ -27,7 +27,11 @@ public interface CrewMapper {
 
 	public List<ReservationDTO> selectToBeCollectList() throws Exception;
 
+	public List<ReservationDTO> selectToBeCollectListLimit() throws  Exception;
+
 	public List<WashingCompleteDTO> selectWcList() throws Exception;
+
+	public List<WashingCompleteDTO> selectWcListLimit() throws Exception;
 
 	public int updateDelivering(Long reservationId) throws Exception;
 
@@ -38,4 +42,5 @@ public interface CrewMapper {
 	public int insertDelivery(DeliveryDTO deliveryDTO) throws Exception;
 
 	public List<DeliveryDTO> selectDeliveryList(Map<String, Object> paramMap) throws Exception;
+
 }

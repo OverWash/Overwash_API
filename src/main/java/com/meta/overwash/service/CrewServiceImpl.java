@@ -92,8 +92,18 @@ public class CrewServiceImpl implements CrewService {
 	}
 
 	@Override
+	public List<ReservationDTO> getToBeCollectListLimit() throws Exception {
+		return crewMapper.selectToBeCollectListLimit();
+	}
+
+	@Override
 	public List<WashingCompleteDTO> getWcList() throws Exception {
 		return crewMapper.selectWcList();
+	}
+
+	@Override
+	public List<WashingCompleteDTO> getWcListLimit() throws Exception {
+		return crewMapper.selectWcListLimit();
 	}
 
 	@Override

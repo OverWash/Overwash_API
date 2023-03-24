@@ -26,7 +26,11 @@ public interface CrewService {
 
 	public List<ReservationDTO> getToBeCollectList() throws Exception;
 
+	public List<ReservationDTO> getToBeCollectListLimit() throws Exception;
+
 	public List<WashingCompleteDTO> getWcList() throws Exception;
+
+	public List<WashingCompleteDTO> getWcListLimit() throws Exception;
 
 	public boolean updateDelivering(Long reservationId, DeliveryDTO deliveryDTO) throws Exception;
 

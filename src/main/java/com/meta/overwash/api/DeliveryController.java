@@ -41,7 +41,7 @@ public class DeliveryController {
         System.out.println(user + "21111111111111111111111111111111111111111111111111111111111111111");
         CrewDTO crew = crewService.getCrew(user.getUserId());
 
-        return crewService.getDeliveryList(crew.getCrewId(), "배달완료");
+        return crewService.getDeliveryList(crew.getCrewId(), "배달중");
     }
 
     @GetMapping("/completed")

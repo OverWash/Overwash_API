@@ -159,6 +159,28 @@
 			reservation_status = '주문접수'
 	</select>
 
+	<select id="selectToBeCollectListLimit" resultMap="reservationMap">
+		<![CDATA[
+		select
+			r.reservation_id  	 as reservation_id,
+			r.collect_date       as collect_date,
+			r.reservation_date   as reservation_date,
+			r.request 		     as request,
+			r.reservation_status as reservation_status,
+			m.member_id			 as member_id,
+			m.member_address     as member_address,
+			m.member_contact     as member_contact,
+			m.nickname			 as nickname
+		from
+			reservation r
+				join member m
+					 on r.member_id = m.member_id
+		where
+			reservation_status = '주문접수'
+		  and ROWNUM <= 5
+		]]>
+	</select>
+
 	<select id="selectWcList"  resultMap="washingCompleteMap">
 		select
 			wc.wc_id          	 as wc_id,
@@ -197,7 +219,48 @@
 		where
 			r.reservation_status = '세탁완료'
 	</select>
-	
+	<select id="selectWcListLimit" resultMap="washingCompleteMap">
+		<![CDATA[
+			select
+				wc.wc_id          	 as wc_id,
+				wc.wc_date       	 as wc_date,
+				rc.confirm_id     	 as confirm_id,
+				rc.confirm_date   	 as confirm_date,
+				f.factory_id     	 as factory_id,
+				f.factory_contact    as factory_contact,
+				f.factory_address    as factory_address,
+				c.crew_id		  	 as crew_id,
+				c.crew_contact		 as crew_contact,
+				c.crew_name			 as crew_name,
+				c.car_type			 as car_type,
+				c.car_number		 as car_number,
+				r.reservation_id  	 as reservation_id,
+				r.collect_date       as collect_date,
+				r.reservation_date   as reservation_date,
+				r.request 		     as request,
+				r.reservation_status as reservation_status,
+				m.member_id			 as member_id,
+				m.member_address     as member_address,
+				m.member_contact     as member_contact,
+				m.nickname			 as nickname
+			from
+				washing_complete wc
+					join reservation_confirmed rc
+						 on wc.confirm_id = rc.confirm_id
+					join reservation r
+						 on rc.reservation_id = r.reservation_id
+					join laundry_factory f
+						 on rc.factory_id = f.factory_id
+					join crew c
+						 on rc.crew_id = c.crew_id
+					join member m
+						 on r.member_id = m.member_id
+			where
+				r.reservation_status = '세탁완료'
+			and ROWNUM <= 5
+		]]>
+	</select>
+
 	<update id="updateDelivering" parameterType="Long">
 		update
 			reservation
