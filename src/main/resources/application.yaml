@@ -21,8 +21,10 @@ spring:
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.meta.overwash.domain
+  configuration:
+    map-underscore-to-camel-case: true
 
 
 token:
-  expiration_time : 3600
+  expiration_time : 3600000
   secret: user
