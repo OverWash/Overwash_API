@@ -19,7 +19,7 @@ public interface ReservationMapper {
 
 	public List<ReservationDTO> getListByMember(Long memberId);
 
-	public int updateReservation(ReservationDTO reservation);
+	public int updateReservationRequest(ReservationDTO reservation);
 
 	public int deleteReservation(Long reservationId);	
 	
@@ -28,7 +28,7 @@ public interface ReservationMapper {
 	public int updateReservationStatus(ReservationDTO reservation);
 		 
 	public ReservationDTO getReservation(Long reservationId);
-	
+
 }  
 
 

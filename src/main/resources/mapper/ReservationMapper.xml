@@ -176,4 +176,17 @@
 	WHERE RESERVATION_ID = #{reservationId}
 	</select>
 
+	<update id="updateReservationRequest" parameterType="ReservationDTO">
+		UPDATE reservation
+		SET request = #{request}
+		WHERE reservation_id = #{reservationId}
+		  AND reservation_status = '주문접수'
+	</update>
+
+	<delete id="deleteReservation">
+		DELETE FROM reservation
+		WHERE reservation_id = #{reservationId}
+		  AND reservation_status = '주문접수'
+	</delete>
+
 </mapper>

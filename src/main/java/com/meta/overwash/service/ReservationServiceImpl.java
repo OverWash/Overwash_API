@@ -58,4 +58,13 @@ public class ReservationServiceImpl implements ReservationService{
 		return mapper.getListByMember(memberId);
 	}
 
+	@Override
+	public void removeReservation(Long reservationId) {
+		mapper.deleteReservation(reservationId);
+	}
+
+	@Override
+	public void updateReservationRequest(ReservationDTO reservation) {
+		mapper.updateReservationRequest(reservation);
+	};
 }
