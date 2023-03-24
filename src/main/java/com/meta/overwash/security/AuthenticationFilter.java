@@ -38,10 +38,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
+            System.out.println("1111111111111");
             // 로그인 요청 시 넘어오는 객체
+            System.out.println(request.getInputStream());
+            System.out.println(UserDTO.class);
             UserDTO user = new ObjectMapper().readValue(request.getInputStream(), UserDTO.class);
             //여기까지는 넘어옴
-
+            System.out.println(user);
             return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -59,7 +62,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = Jwts.builder()
                 .setSubject(userDetail.getEmail())
-                .setSubject(userDetail.getRole())
                 .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
