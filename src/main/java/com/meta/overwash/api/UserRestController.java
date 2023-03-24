@@ -29,7 +29,7 @@ public class UserRestController {
 //    }
     @GetMapping("/test")
     public String test(@AuthenticationPrincipal UserDTO user){
-//        System.out.println(user);
+        System.out.println(user);
         return "test";
     }
 

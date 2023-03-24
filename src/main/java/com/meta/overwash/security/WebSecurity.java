@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -33,6 +34,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests().antMatchers("/login").permitAll();
         http.authorizeRequests().antMatchers("/error/**").permitAll();
+        http.authorizeRequests().antMatchers("/register/**").permitAll();
+
         http.authorizeRequests().antMatchers("/member/**").access("ROLE_MEMBER");
         http.authorizeRequests().antMatchers("/crew/**").access("ROLE_CREW");
         http.authorizeRequests().antMatchers("/admin/**").access("ROLE_ADMIN");
@@ -42,6 +45,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .and()
                 .addFilter(getAuthenticationFilter()); // 로그인을 거쳐야 함
 
+        http.logout()
+            .invalidateHttpSession(true)
+            .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
+                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+            });
 
     }
 
