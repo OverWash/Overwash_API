@@ -44,7 +44,7 @@ public class UserRestController {
 
     // 이메일 존재 여부 검사
     @GetMapping("/check")
-    public String getUserEmail(@RequestParam("email") String email) {
+    public String userEmail(@RequestParam("email") String email) {
         System.out.println("getUserEmail : 이메일 중복 검사 호출..........");
 
         /* email(username) 중복 체크 :  null이 아니면 이미 등록된 이메일이 있는 것 */
@@ -53,13 +53,13 @@ public class UserRestController {
 
     // 연락처 존재 여부 검사
     @GetMapping("/check/member/{contact}")
-    public String getMemberContact(@PathVariable("contact") String contact) throws Exception {
+    public String memberContact(@PathVariable("contact") String contact) throws Exception {
         System.out.println("getMemberContact :  멤버 테이블 전화번호 중복 검사 호출...........");
         return memberService.getContact(contact) == null ? "possible" : "impossible";
     }
 
     @GetMapping("/check/crew/{contact}")
-    public String getCrewContact(@PathVariable("contact") String contact) throws Exception {
+    public String crewContact(@PathVariable("contact") String contact) throws Exception {
         System.out.println("getCrewContact :  크루 테이블 전화번호 중복 검사 호출...........");
         return crewService.getContact(contact) == null ? "possible" : "impossible";
     }
