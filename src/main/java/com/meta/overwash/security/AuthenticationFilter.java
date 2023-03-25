@@ -64,9 +64,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact();
 
-        response.addHeader("role",userDetail.getRole());
-        Cookie cookie = new Cookie("token",token);
-
-        response.addCookie(cookie);
+        response.addHeader("role", userDetail.getRole());
+        response.addHeader("token", token);
+        response.addHeader("userid", userDetail.getUserId() + "");
     }
+
+
 }
