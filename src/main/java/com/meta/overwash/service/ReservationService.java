@@ -28,6 +28,6 @@ public interface ReservationService {
 	public void removeReservation(Long reservationId);
 
 	// 주문접수상태 예약건 요청사항수정
-	public void updateReservationRequest(ReservationDTO reservation);
+	public boolean updateReservationRequest(ReservationDTO reservation);
 
 }

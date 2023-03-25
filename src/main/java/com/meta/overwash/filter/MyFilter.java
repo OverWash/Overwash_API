@@ -32,7 +32,7 @@ public class MyFilter implements Filter {
 
     private final Environment env;
 
-    private UserService userService;
+    private final UserService userService;
     MyFilter(Environment env,UserService userService){
         this.env = env;
         this.userService =userService;

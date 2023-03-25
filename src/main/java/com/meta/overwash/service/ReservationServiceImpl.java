@@ -64,7 +64,12 @@ public class ReservationServiceImpl implements ReservationService{
 	}
 
 	@Override
-	public void updateReservationRequest(ReservationDTO reservation) {
-		mapper.updateReservationRequest(reservation);
-	};
+	public boolean updateReservationRequest(ReservationDTO reservation) {
+		if(mapper.updateReservationRequest(reservation) == 0) {
+			return false;
+		}
+
+		return mapper.updateReservationRequest(reservation) == 1;
+
+	}
 }
