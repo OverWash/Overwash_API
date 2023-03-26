@@ -37,7 +37,6 @@ public class ReservationRestController {
                                                                @RequestParam(required = false, defaultValue = "10") int amount) throws Exception {
         cri.setPageNum(page);
         cri.setAmount(amount);
-
         MemberDTO member = memberService.getMember(userid);
         return new ResponseEntity<>(reservationService.getListByMember(cri, member.getMemberId()), HttpStatus.OK);
     }
