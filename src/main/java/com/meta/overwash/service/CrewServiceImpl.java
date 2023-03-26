@@ -5,16 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.meta.overwash.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.meta.overwash.domain.CrewDTO;
-import com.meta.overwash.domain.DeliveryDTO;
-import com.meta.overwash.domain.ReservationDTO;
-import com.meta.overwash.domain.UserDTO;
-import com.meta.overwash.domain.WashingCompleteDTO;
 import com.meta.overwash.mapper.CrewMapper;
 import com.meta.overwash.mapper.UserMapper;
 
@@ -44,10 +40,10 @@ public class CrewServiceImpl implements CrewService {
 		crewMapper.insertCrew(crew);
 	}
 
-	@Override
-	public boolean remove(Long crewId) throws Exception {
-		return crewMapper.deleteCrew(crewId) == 1;
-	}
+//	@Override
+//	public boolean remove(Long crewId) throws Exception {
+//		return crewMapper.deleteCrew(crewId) == 1;
+//	}
 
 	@Override
 	@Transactional
@@ -97,6 +93,11 @@ public class CrewServiceImpl implements CrewService {
 	}
 
 	@Override
+	public List<ReservationDTO> getToBeCollectListWithPaging(Criteria cri) throws Exception {
+		return crewMapper.selectToBeCollectListWithPaging(cri);
+	}
+
+	@Override
 	public List<WashingCompleteDTO> getWcList() throws Exception {
 		return crewMapper.selectWcList();
 	}
@@ -104,6 +105,11 @@ public class CrewServiceImpl implements CrewService {
 	@Override
 	public List<WashingCompleteDTO> getWcListLimit() throws Exception {
 		return crewMapper.selectWcListLimit();
+	}
+
+	@Override
+	public List<WashingCompleteDTO> getWcListWithPaging(Criteria cri) throws Exception {
+		return crewMapper.selectWcListWithPaging(cri);
 	}
 
 	@Override
@@ -127,10 +133,30 @@ public class CrewServiceImpl implements CrewService {
 		paramMap.put("crewId", crewId);
 		paramMap.put("status", status);
 
-		List<DeliveryDTO> deliveryList = crewMapper.selectDeliveryList(paramMap);
-
-		return deliveryList;
+		return crewMapper.selectDeliveryList(paramMap);
 	}
+
+	@Override
+	public List<DeliveryDTO> getDeliveryListWithPaging(Long crewId, String status, Criteria cri) throws Exception {
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("crewId", crewId);
+		paramMap.put("status", status);
+		paramMap.put("pageNum", cri.getPageNum());
+		paramMap.put("amount", cri.getAmount());
+
+		return crewMapper.selectDeliveryListWithPaging(paramMap);
+	}
+
+	@Override
+	public int getTotalToBeCollect(Criteria cri) throws Exception {
+		return crewMapper.selectTotalToBeCollect(cri);
+	}
+
+	@Override
+	public int getTotalToBeDelivery(Criteria cri) throws Exception {
+		return crewMapper.selectTotalToBeDelivery(cri);
+	}
+
 
 }
 

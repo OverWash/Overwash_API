@@ -92,17 +92,17 @@
 			c.user_id = #{userId}
 	</select>
 	
- 	<update id="deleteCrew" parameterType="Long">
-		update users
-		set
-			enabled = 0
-		where
-			user_id = (
-						select user_id
-						from crew
-						where crew_id = #{crewId}
-			)
-	</update>
+<!-- 	<update id="deleteCrew" parameterType="Long">-->
+<!--		update users-->
+<!--		set-->
+<!--			enabled = 0-->
+<!--		where-->
+<!--			user_id = (-->
+<!--						select user_id-->
+<!--						from crew-->
+<!--						where crew_id = #{crewId}-->
+<!--			)-->
+<!--	</update>-->
 	
 	<update id="updateCrew" parameterType="CrewDTO">
 		update crew
@@ -181,6 +181,38 @@
 		]]>
 	</select>
 
+	<select id="selectToBeCollectListWithPaging" resultMap="reservationMap">
+		<![CDATA[
+		select
+			reservation_id, collect_date, reservation_date, request, reservation_status,
+			member_id, member_address, member_contact, nickname
+		from (
+				 select	/*+Index_ASC(RESERVATION RESERVATION_DATE_IDX)*/
+				     rownum 			  as rn,
+					 r.reservation_id  	  as reservation_id,
+					 r.collect_date       as collect_date,
+					 r.reservation_date   as reservation_date,
+					 r.request 		      as request,
+					 r.reservation_status as reservation_status,
+					 m.member_id		  as member_id,
+					 m.member_address     as member_address,
+					 m.member_contact     as member_contact,
+					 m.nickname			  as nickname
+				 from
+					 reservation r
+						 join member m
+							  on r.member_id = m.member_id
+				 where
+					 reservation_status = '주문접수'
+				 and
+					rownum <= #{pageNum} * #{amount}
+			 )
+		where
+		    rn > (#{pageNum} - 1) * #{amount}
+		]]>
+
+	</select>
+
 	<select id="selectWcList"  resultMap="washingCompleteMap">
 		select
 			wc.wc_id          	 as wc_id,
@@ -219,6 +251,7 @@
 		where
 			r.reservation_status = '세탁완료'
 	</select>
+
 	<select id="selectWcListLimit" resultMap="washingCompleteMap">
 		<![CDATA[
 			select
@@ -258,6 +291,57 @@
 			where
 				r.reservation_status = '세탁완료'
 			and ROWNUM <= 5
+		]]>
+	</select>
+
+	<select id="selectWcListWithPaging" resultMap="washingCompleteMap">
+		<![CDATA[
+			select wc_id, wc_date, confirm_id, confirm_date, factory_id, factory_contact, factory_address, crew_id,
+				   crew_contact, crew_name, car_type, car_number, reservation_id, collect_date, reservation_date,
+				   request, reservation_status, member_id, member_address, member_contact, nickname
+			from (
+					 select /*+Index_ASC(WASHING_COMPLETE WC_DATE_IDX)*/
+					     rownum				  as rn,
+						 wc.wc_id          	  as wc_id,
+						 wc.wc_date       	  as wc_date,
+						 rc.confirm_id     	  as confirm_id,
+						 rc.confirm_date   	  as confirm_date,
+						 f.factory_id     	  as factory_id,
+						 f.factory_contact    as factory_contact,
+						 f.factory_address    as factory_address,
+						 c.crew_id		  	  as crew_id,
+						 c.crew_contact		  as crew_contact,
+						 c.crew_name		  as crew_name,
+						 c.car_type			  as car_type,
+						 c.car_number		  as car_number,
+						 r.reservation_id  	  as reservation_id,
+						 r.collect_date       as collect_date,
+						 r.reservation_date   as reservation_date,
+						 r.request 		      as request,
+						 r.reservation_status as reservation_status,
+						 m.member_id		  as member_id,
+						 m.member_address     as member_address,
+						 m.member_contact     as member_contact,
+						 m.nickname			  as nickname
+					 from
+						 washing_complete wc
+							 join reservation_confirmed rc
+								  on wc.confirm_id = rc.confirm_id
+							 join reservation r
+								  on rc.reservation_id = r.reservation_id
+							 join laundry_factory f
+								  on rc.factory_id = f.factory_id
+							 join crew c
+								  on rc.crew_id = c.crew_id
+							 join member m
+								  on r.member_id = m.member_id
+					 where
+						 r.reservation_status = '세탁완료'
+					   and
+						 rownum <= #{pageNum} * #{amount}
+				 )
+			where
+				rn > (#{pageNum} - 1) * #{amount}
 		]]>
 	</select>
 
@@ -316,6 +400,47 @@
 			d.crew_id = #{crewId}
 		and d.status  = #{status}
 	</select>
+
+	<select id="selectDeliveryListWithPaging" parameterType="hashmap" resultMap="deliveryMap">
+		<![CDATA[
+			select delivery_id, delivery_date, status, crew_id, wc_id, wc_date, member_address,
+				   member_contact, nickname, reservation_id
+			from (
+					 select /*+Index_ASC(DELIVERY DELIVERY_DATE_IDX)*/
+						 rownum			  as rn,
+						 d.delivery_id    as delivery_id,
+						 d.delivery_date  as delivery_date,
+						 d.status 		  as status,
+						 c.crew_id 		  as crew_id,
+						 wc.wc_id 	 	  as wc_id,
+						 wc.wc_date  	  as wc_date,
+						 m.member_address as member_address,
+						 m.member_contact as member_contact,
+						 m.nickname 	  as nickname,
+						 r.reservation_id as reservation_id
+					 from
+						 delivery d
+							 join crew c
+								  on d.crew_id = c.crew_id
+							 join washing_complete wc
+								  on d.wc_id = wc.wc_id
+							 join reservation_confirmed rc
+								  on rc.confirm_id = wc.confirm_id
+							 join reservation r
+								  on rc.reservation_id = r.reservation_id
+							 join member m
+								  on r.member_id = m.member_id
+					 where
+						 d.crew_id = #{crewId}
+					 and
+						 d.status  = #{status}
+					 and
+						rownum <= #{pageNum} * #{amount}
+				 )
+			where
+				rn > (#{pageNum} - 1) * #{amount}
+		]]>
+	</select>
 	
 	<update id="updateDoneDelivery" parameterType="Long">
 		update
@@ -326,5 +451,24 @@
 		where
 			delivery_id = #{deliveryId}
 	</update>
+
+	<select id="selectTotalToBeCollect" resultType="Integer">
+		select
+		    count(*)
+		from
+		    reservation
+		where
+		    reservation_status = '주문접수'
+	</select>
+
+	<select id="selectTotalToBeDelivery" resultType="Integer">
+		select
+		    count(*)
+		from
+			reservation
+		where
+			reservation_status = '세탁완료'
+
+	</select>
 
 </mapper>
