@@ -183,7 +183,7 @@
 		  AND reservation_status = '주문접수'
 	</update>
 
-	<delete id="deleteReservation">
+	<delete id="deleteReservation" parameterType="Long">
 		DELETE FROM reservation
 		WHERE reservation_id = #{reservationId}
 		  AND reservation_status = '주문접수'

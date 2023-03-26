@@ -39,7 +39,7 @@ public class ReservationRestController {
 
     @PostMapping(value="{userId}", produces = "application/hal+json; charset=UTF-8")
     public void registerReservation(@PathVariable("userId") Long userId,
-                                                              @RequestBody ReservationDTO reservation) throws Exception{
+                                    @RequestBody ReservationDTO reservation) throws Exception{
         UserDTO user = new UserDTO();
         user.setUserId(userId);
         MemberDTO member = memberService.getMember(user.getUserId());
@@ -48,20 +48,27 @@ public class ReservationRestController {
     }
 
 
-    @DeleteMapping("{reservationId}")
-    public void deleteReservation(@PathVariable("reservationId") Long reservationId) throws Exception {
-        reservationService.removeReservation(reservationId);
+//    @RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
+//            method = RequestMethod.DELETE, value = "{reservationId}")
+    @DeleteMapping(value="{reservationId}", produces = "application/hal+json; charset=UTF-8")
+    public ResponseEntity<String> removeReservation(
+            @PathVariable("reservationId") Long reservationId) {
+        return reservationService.removeReservation(reservationId)
+                ? new ResponseEntity<>("success", HttpStatus.OK)
+                : new ResponseEntity<>("fail", HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
             method = RequestMethod.PATCH, value = "{reservationId}")
-    public ResponseEntity<String> updateReservationRequest
-            (@PathVariable("reservationId") Long userId,
-             @RequestBody ReservationDTO reservation) throws Exception {
+    public ResponseEntity<String> updateReservationRequest(
+            @PathVariable("reservationId") Long reservationId,
+            @RequestBody ReservationDTO reservation) {
+
+        reservation.setReservationId(reservationId);
 
         return reservationService.updateReservationRequest(reservation)
-                ? new ResponseEntity<>("success", HttpStatus.OK)
-                : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            ? new ResponseEntity<>("success", HttpStatus.OK)
+            : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     // Auth 가 왜 안될까?

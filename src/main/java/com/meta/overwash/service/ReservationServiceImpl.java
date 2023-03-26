@@ -59,8 +59,12 @@ public class ReservationServiceImpl implements ReservationService{
 	}
 
 	@Override
-	public void removeReservation(Long reservationId) {
-		mapper.deleteReservation(reservationId);
+	public boolean removeReservation(Long reservationId) {
+		int result = mapper.deleteReservation(reservationId);
+		if (result == 0) {
+			return false;
+		}
+		return result == 1;
 	}
 
 	@Override
@@ -68,7 +72,6 @@ public class ReservationServiceImpl implements ReservationService{
 		if(mapper.updateReservationRequest(reservation) == 0) {
 			return false;
 		}
-
 		return mapper.updateReservationRequest(reservation) == 1;
 
 	}
