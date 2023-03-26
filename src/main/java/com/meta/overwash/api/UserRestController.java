@@ -27,9 +27,8 @@ public class UserRestController {
 //        return new ResponseEntity<>(responseUser , HttpStatus.CREATED);
 //
 //    }
-    @GetMapping("/member/1")
+    @GetMapping("/test")
     public String test(@AuthenticationPrincipal UserDTO user){
-        System.out.println(user);
         return "test";
     }
 

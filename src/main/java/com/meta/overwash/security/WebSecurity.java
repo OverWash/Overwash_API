@@ -1,61 +1,54 @@
 package com.meta.overwash.security;
 
-
+import com.meta.overwash.filter.MyFilter;
 import com.meta.overwash.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.stereotype.Component;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.Filter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    private UserService userService;
-    private BCryptPasswordEncoder passwordEncoder;
-
-    private Environment env;
-    public WebSecurity(UserService userService, BCryptPasswordEncoder passwordEncoder,
-                       Environment env) {
-        this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
-        this.env = env;
-    }
+    private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final Environment env;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception { // 어떤 권한에 대해서 작업을 수행하고 싶을 때. 권한 처리 수행
+    protected void configure(HttpSecurity http) throws Exception {
+        // 어떤 권한에 대해서 작업을 수행하고 싶을 때. 권한 처리 수행
 
-        http.csrf().disable(); // csrf 토큰
-
-        http.authorizeRequests().antMatchers("/login").permitAll();
-        http.authorizeRequests().antMatchers("/error/**").permitAll();
-//        http.authorizeRequests().antMatchers("/member/**").access("hasRole(ROLE_MEMBER)");
-//        http.authorizeRequests().antMatchers("/crew/**").access("hasRole(ROLE_CREW)");
-//        http.authorizeRequests().antMatchers("/admin/**").access("hasRole(ROLE_ADMIN)");
-
-        http.authorizeRequests().antMatchers("/**")// 모든 요청
-                .hasIpAddress("127.0.0.1")
+        http.csrf()
+                .disable()   // csrf 토큰
+                .httpBasic().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests().antMatchers("/login").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+//                .antMatchers("/admin/1").access("ROLE_ADMIN")
+                .antMatchers("/member/**").hasRole("MEMBER")
+                .antMatchers("/**").permitAll()// 모든 요청
                 .and()
                 .addFilter(getAuthenticationFilter())
-                ; // 로그인을 거쳐야 함
+                .addFilterAfter(new MyFilter(env,userService), UsernamePasswordAuthenticationFilter.class)
 
+        ; // 로그인을 거쳐야 함
 
 
     }
-
 
     // 넘어오는 token 을 filter 로 생성
     private Filter getAuthenticationFilter() throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), userService,env);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authenticationManager(), userService, env);
         return authenticationFilter;
     }
 

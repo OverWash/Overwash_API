@@ -34,7 +34,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         this.env = env;
     }
 
-      v// 로그인 버튼을 누르는 순간 가장 먼저 호출되는 함수. 인증 요청
+    // 로그인 버튼을 누르는 순간 가장 먼저 호출되는 함수. 인증 요청
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         try {
@@ -58,14 +58,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = Jwts.builder()
                 .setSubject(userDetail.getEmail())
-                .claim("auth",userDetail.getRole())
+                .claim("auth", userDetail.getRole())
                 .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact();
 
-        response.addHeader("role",userDetail.getRole());
-        Cookie cookie = new Cookie("token",token);
+        response.addHeader("role", userDetail.getRole());
+        response.addHeader("token",token);
+        Cookie cookie = new Cookie("token", token);
 
         response.addCookie(cookie);
     }

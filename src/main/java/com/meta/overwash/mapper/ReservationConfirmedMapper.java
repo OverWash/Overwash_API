@@ -3,6 +3,7 @@ package com.meta.overwash.mapper;
 import java.util.HashMap;
 import java.util.List;
 
+import com.meta.overwash.domain.Criteria;
 import com.meta.overwash.domain.ReservationConfirmedDTO;
 import com.meta.overwash.domain.ReservationDTO;
 import com.meta.overwash.domain.UserDTO;
@@ -25,8 +26,9 @@ public interface ReservationConfirmedMapper {
 	public Long getCount(UserDTO users);
 
 	//관리자 세탁예정목록 가져오기(결제가 완료된)
-	public List<ReservationConfirmedDTO> getListByPaymentComplete();
+	public List<ReservationConfirmedDTO> getListByPaymentComplete(Criteria cri);
 
 
+	public Long getCountKeyword(Criteria cri);
 
 }

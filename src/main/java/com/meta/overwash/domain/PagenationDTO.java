@@ -9,12 +9,12 @@ public class PagenationDTO {
 	private int endPage;
 	private boolean prev, next;
 
-	private int total;
+	private Long total;
 	private int pageNum;
 	private int amount;
 	private Criteria cri;
 
-	public PagenationDTO(Criteria cri, int total) {
+	public PagenationDTO(Criteria cri, Long total) {
 
 		this.cri = cri;
 		this.total = total;

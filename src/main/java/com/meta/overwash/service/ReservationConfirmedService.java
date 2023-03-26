@@ -11,6 +11,6 @@ public interface ReservationConfirmedService {
 
 	public Map<String, Object> getList(Criteria cri);
 
-	public List<ReservationConfirmedDTO> getListToPaymentCompleteList();
+	public Map<String,Object> getListToPaymentCompleteList(Criteria cri);
 	public ReservationConfirmedDTO insertReservationConfirmed(Long reservationId, CrewDTO crew);
 }

@@ -122,14 +122,60 @@
 	
 	<!-- 결제완료에 대한 정보  -->
 	<select id="getListByPaymentComplete" resultMap="getConfirm">
-		SELECT *
+
+        SELECT
+        CONFIRM_ID,
+        CONFIRM_DATE,
+        RESERVATION_ID,
+        COLLECT_DATE,
+        RESERVATION_DATE,
+        REQUEST,
+        RESERVATION_STATUS,
+        member_contact,
+        nickname
+        FROM
+        (SELECT
+        ROWNUM RN,
+        RC.CONFIRM_ID,
+        RC.CONFIRM_DATE,
+        R.COLLECT_DATE,
+        R.RESERVATION_ID,
+        R.RESERVATION_DATE,
+        R.REQUEST,
+        R.RESERVATION_STATUS,
+        M.member_contact,
+        M.nickname
+        FROM
+        RESERVATION_CONFIRMED RC
+        JOIN
+        RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
+        JOIN
+        MEMBER M ON M.MEMBER_ID = R.MEMBER_ID
+        WHERE
+        <![CDATA[
+						ROWNUM < = #{pageNum} * #{amount}
+						AND
+						RESERVATION_STATUS LIKE '%'||'결제완료'||'%']]>
+<!--        <if test="userId !=null">-->
+<!--            AND user_id = #{userId}-->
+<!--        </if>-->
+        )
+        WHERE
+        RN > (#{pageNum}-1) * #{amount}
+
+    </select>
+
+
+	<select id="getCountKeyword" resultType="Long">
+		SELECT
+			COUNT(*)
 		FROM
-		RESERVATION_CONFIRMED RC
-		JOIN
-		RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
-		JOIN MEMBER M ON R.MEMBER_ID = M.MEMBER_ID
+			RESERVATION_CONFIRMED RC
+				JOIN
+			RESERVATION R ON RC.RESERVATION_ID = R.RESERVATION_ID
 		WHERE
-		R.RESERVATION_STATUS LIKE '%'||'결제완료'||'%'
+			RESERVATION_STATUS LIKE '%'||#{type}||'%'
+
 	</select>
 
 </mapper>
