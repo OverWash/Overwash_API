@@ -106,13 +106,6 @@ public class PaymentServiceImpl implements PaymentService {
 		return prMapper.getPaymentRequest(pno);
 	}
 
-	// 고객
-	/*-
-	 * 결제 진행 시 어떤 건에 대해 결제를 진행할 지
-	 * 정보가 있어야 하기 때문에 파라미터로 결제요청 번호를 받음
-	 * 또, 결제 방식에 대한 정보를 받아야 해서
-	 *
-	 * */
 	@Override
 	@Transactional
 	public void paymentProcess(Long prId, Long confirmId, ReceiptDTO receipt) {

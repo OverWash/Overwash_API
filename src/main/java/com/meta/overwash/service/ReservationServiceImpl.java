@@ -1,7 +1,11 @@
 package com.meta.overwash.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.meta.overwash.domain.Criteria;
+import com.meta.overwash.domain.PagenationDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,8 +58,24 @@ public class ReservationServiceImpl implements ReservationService{
 	}
 
 	@Override
-	public List<ReservationDTO> getListByMember(Long memberId) {
-		return mapper.getListByMember(memberId);
+	public Map<String, Object> getListByMember(Criteria cri, Long memberId) {
+
+		// Mapper에 들어갈 파라미터 map으로 변환
+		HashMap<String, Object> vo = new HashMap<String, Object>();
+		vo.put("pageNum", cri.getPageNum());
+		vo.put("amount", cri.getAmount());
+		vo.put("memberId", memberId);
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("reservationPaging", new PagenationDTO(cri, getCountToMember(memberId).intValue()));
+		map.put("reservations", mapper.getListByMember(vo));
+		return map;
+	}
+
+	/* ------------------- paging 메소드 ------------------  */
+
+	private Long getCountToMember(Long memberId) {
+		return mapper.getCountToMember(memberId);
 	}
 
 }
