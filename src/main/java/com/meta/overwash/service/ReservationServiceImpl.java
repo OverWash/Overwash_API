@@ -78,4 +78,21 @@ public class ReservationServiceImpl implements ReservationService{
 		return mapper.getCountToMember(memberId).intValue();
 	}
 
+	@Override
+	public boolean removeReservation(Long reservationId) {
+		int result = mapper.deleteReservation(reservationId);
+		if (result == 0) {
+			return false;
+		}
+		return result == 1;
+	}
+
+	@Override
+	public boolean updateReservationRequest(ReservationDTO reservation) {
+		if(mapper.updateReservationRequest(reservation) == 0) {
+			return false;
+		}
+		return mapper.updateReservationRequest(reservation) == 1;
+
+	}
 }
