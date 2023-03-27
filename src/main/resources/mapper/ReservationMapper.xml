@@ -105,26 +105,23 @@
                 r.reservation_id = #{reservationId}
 	</select>
 
-		<select id="getListByMember" resultMap="reservationMap" parameterType="HashMap">
-			<![CDATA[
-			SELECT
-				reservation_id, collect_date, reservation_date, request,
-				reservation_status
-			FROM
-				(
-					SELECT
-						ROWNUM RN,
-						r.*
-					FROM
-						RESERVATION r
-					WHERE
-						ROWNUM < = #{pageNum} * #{amount}
-					  AND
-						member_id = #{memberId}
-				)
-			WHERE RN > (#{pageNum}-1) * #{amount}
-			]]>
-		</select>
+	<select id="getListByMember" resultMap="reservationMap" parameterType="HashMap">
+		<![CDATA[
+		SELECT
+			reservation_id, collect_date, reservation_date, request,
+			reservation_status
+		FROM
+			(SELECT ROWNUM RN, r.*
+			 FROM
+				 (SELECT /*+ INDEX (reservation idx_reservation_date DESC) */ *
+				  FROM reservation
+				  ORDER BY reservation_date DESC) r
+			 WHERE ROWNUM < = #{pageNum} * #{amount}
+			   AND member_id = #{memberId})
+		WHERE RN > (#{pageNum}-1) * #{amount}
+		]]>
+	</select>
+
 
 
 
