@@ -83,4 +83,8 @@ public class ReservationConfirmedServiceImpl implements ReservationConfirmedServ
 
 	}
 
+    @Override
+    public ReservationConfirmedDTO findById(Long confirmId) {
+        return rcMapper.getReservationConfirm(confirmId);
+    }
 }

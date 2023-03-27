@@ -13,4 +13,6 @@ public interface ReservationConfirmedService {
 
 	public Map<String,Object> getListToPaymentCompleteList(Criteria cri);
 	public ReservationConfirmedDTO insertReservationConfirmed(Long reservationId, CrewDTO crew);
+
+	ReservationConfirmedDTO findById(Long confirmId);
 }

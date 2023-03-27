@@ -3,9 +3,11 @@ package com.meta.overwash.api;
 import com.meta.overwash.domain.Criteria;
 import com.meta.overwash.domain.LaundryDTO;
 import com.meta.overwash.domain.PaymentRequestDTO;
+import com.meta.overwash.domain.ReservationConfirmedDTO;
 import com.meta.overwash.service.PaymentService;
 import com.meta.overwash.service.ReservationConfirmedService;
 import com.meta.overwash.service.WashingCompleteService;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,8 @@ public class AdminRestController {
         return new ResponseEntity<>(maps,HttpStatus.OK);
     }
 
+
+
     // 검수완료 처리하기
     @PostMapping("/rc/{confirmId}/complete")
     public ResponseEntity checkLaundryComplete(@PathVariable Long confirmId,
@@ -57,4 +61,10 @@ public class AdminRestController {
         washingCompleteService.insertWashingComplete(confirmId);
     return new ResponseEntity(null, HttpStatus.CREATED);
     }
+
+    @GetMapping("/rc/{confirmId}/detail")
+    public ResponseEntity<ReservationConfirmedDTO> checkConfirmDetail(@PathVariable Long confirmId){
+        return new ResponseEntity<>(reservationConfirmedService.findById(confirmId), HttpStatus.OK);
+    }
 }
+
