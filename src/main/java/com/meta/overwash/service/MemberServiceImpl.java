@@ -29,7 +29,7 @@ public class MemberServiceImpl implements MemberService {
 	@Transactional
 	public void insert(UserDTO user, MemberDTO member) throws Exception {
 
-		user.setRole("ROLE_MEMBER");
+//		user.setRole("ROLE_MEMBER");
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
 		// user 에 먼저 로그인 정보 insert

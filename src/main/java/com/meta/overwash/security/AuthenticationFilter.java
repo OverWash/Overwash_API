@@ -40,7 +40,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         try {
             // 로그인 요청 시 넘어오는 객체
             UserDTO user = new ObjectMapper().readValue(request.getInputStream(), UserDTO.class);
-            //여기까지는 넘어옴
 
             return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
@@ -65,9 +64,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .compact();
 
         response.addHeader("role", userDetail.getRole());
-        response.addHeader("token",token);
-        Cookie cookie = new Cookie("token", token);
-
-        response.addCookie(cookie);
+        response.addHeader("token", token);
+        response.addHeader("userid", userDetail.getUserId() + "");
     }
+
 }

@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -35,18 +36,22 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/login").permitAll()
+                .antMatchers("/error/**").permitAll()
+                .antMatchers("/register/**").permitAll()
+                .antMatchers("/check/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/member/**").hasRole("MEMBER")
+                .antMatchers("/crew/**").access("ROLE_CREW")
                 .antMatchers("/**").permitAll()// 모든 요청
                 .and()
                 .addFilter(getAuthenticationFilter())
                 .addFilterAfter(new MyFilter(env,userService)
                         , UsernamePasswordAuthenticationFilter.class) // 로그인 이후
-
-
-        ; // 로그인을 거쳐야 함
-
-
+                .logout()
+                .invalidateHttpSession(true)
+                .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
+                    httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                });
     }
 
     // 넘어오는 token 을 filter 로 생성
