@@ -47,7 +47,6 @@ public class PaymentServiceImpl implements PaymentService {
 	@Transactional
 	public PaymentRequestDTO requestToAdmin(Long confirmId, List<LaundryDTO> laundryList) {
 		ReservationConfirmedDTO rcDto = rcMapper.getReservationConfirm(confirmId);
-		System.out.println(rcDto);
 		Long price = 0L;
 		for (LaundryDTO laundry : laundryList) {
 			CheckDTO check = new CheckDTO(null, rcDto, laundry);
@@ -70,7 +69,7 @@ public class PaymentServiceImpl implements PaymentService {
 	public Map<String, Object> getListToAdmin(Criteria cri) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		map.put("paymentPaging", new PagenationDTO(cri, getCountToAdmin(cri).intValue()));
+		map.put("paymentPaging", new PagenationDTO(cri, getCountToAdmin(cri)));
 		map.put("paymentRequests", prMapper.getListToAdmin(cri));
 		return map;
 	}

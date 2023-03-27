@@ -2,22 +2,17 @@ package com.meta.overwash.filter;
 
 
 import com.meta.overwash.domain.UserDTO;
-//import com.meta.overwash.errorhandler.ForbiddenException;
 import com.meta.overwash.service.UserService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import lombok.RequiredArgsConstructor;
-import org.springframework.aop.scope.ScopedProxyUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -25,56 +20,61 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
 public class MyFilter implements Filter {
 
-    private final Environment env;
+    private Environment env;
 
     private UserService userService;
-    MyFilter(Environment env,UserService userService){
-        this.env = env;
-        this.userService =userService;
-    };
 
+    public MyFilter(Environment env, UserService userService) {
+        this.env = env;
+        this.userService = userService;
+    }
 
     @Override
-    public void doFilter(ServletRequest request2, ServletResponse response2,
+    public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) request2;
-        HttpServletResponse response = (HttpServletResponse) response2;
 
-        if (request.getHeader("AUTHORIZATION") == null) {
-            onError(response, "UNAUTHORIZATION");
+        String token = getToken((HttpServletRequest) request);
+        if (token != null && isJwtValid(token)) {
+            Authentication authentication = getAuthentication(token);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
-            String authorizationHeader = request.getHeader("AUTHORIZATION");
-            String jwt = authorizationHeader.replace("Bearer", "");
-
-            if (!isJwtValid(jwt)) {
-                onError(response, "UNAUTHORIZATION2");
-            }
+            onError((HttpServletResponse) response, "UNAUTHORIZATION");
         }
-        String role = ((UserDTO)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getRole();
-        boolean check =true;
+        chain.doFilter(request, response);
+    }
 
-        if(request.getRequestURI().contains("member") && role.equals("ROLE_MEMBER")){
-            check = false;
-        }
-        if(request.getRequestURI().contains("admin") && role.equals("ROLE_ADMIN")){
-            check = false;
-        }
-        if(request.getRequestURI().contains("crew") &&  role.equals("ROLE_ADMIN")){
-            check = false;
+    /*
+        jwt에서 role을 가져와
+        UsernamePasswordAuthenticationTokensecurity 에서 권한 처리 리턴
+     */
+    private Authentication getAuthentication(String token) {
 
-        }
-        if(request.getRequestURI().contains(""))
-//        if(check){
-//            throw new ForbiddenException("접근 권한이 없습니다.");
-//        }
+        Claims claims = parseClaims(token); // 토큰 복호화
+        UserDTO user = new UserDTO();
+        String role= claims.get("auth").toString(); // auth에 관련된 내용 가져옴
 
-        chain.doFilter(request2, response2);
+        Collection<? extends GrantedAuthority> authorities = // 권한을 Collection<GrantedAuthority> 로 변환
+                Arrays.stream(role.split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
+        user.setEmail(claims.getSubject());
+        user.setRole(role);
+        UserDetails principal = user;
+        return new UsernamePasswordAuthenticationToken(principal,"",authorities);
+    }
+
+    private String getToken(HttpServletRequest request) {
+        //Request header에서 AUTHORIZATION 가져옴
+        String authorizationHeader = request.getHeader("AUTHORIZATION");
+        // Bearer+" " 를 제외하고 jwt 토큰을 리턴
+        return authorizationHeader.replace("Bearer", "");
     }
 
     private void onError(HttpServletResponse response, String httpStatus) throws IOException {
@@ -82,35 +82,23 @@ public class MyFilter implements Filter {
         response.sendError(HttpServletResponse.SC_FORBIDDEN, httpStatus);
     }
 
-    private boolean isJwtValid(String jwt) {
-        boolean resultValue = true;
-        Claims  claims = null;
-
+    private boolean isJwtValid(String token) {
         try {
-            claims = Jwts.parser().setSigningKey(env.getProperty("token.secret"))
-                    .parseClaimsJws(jwt)
-                    .getBody();
-
-            if(claims == null || claims.isEmpty()){
-                resultValue = false;
-
-            }else{
-                String subject = claims.getSubject();
-
-                Collection<? extends GrantedAuthority> authorities =
-                        Arrays.stream(claims.get("auth").toString().split(","))
-                                .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList());
-                UserDetails principal= userService.getUser(subject);
-                Authentication authentication = new UsernamePasswordAuthenticationToken
-                        (principal, "", authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-
+            Jwts.parser().setSigningKey(env.getProperty("token.secret")).parseClaimsJws(token);
+            return true;
         } catch (Exception e) {
-            resultValue = false;
+            System.out.println(e);
         }
+        return false;
+    }
 
-        return resultValue;
+    private Claims parseClaims(String accessToken) {
+        try {
+            return Jwts.parser().setSigningKey(env.getProperty("token.secret"))
+                    .parseClaimsJws(accessToken)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims();
+        }
     }
 }

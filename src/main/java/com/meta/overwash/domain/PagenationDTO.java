@@ -10,6 +10,8 @@ public class PagenationDTO {
 	private boolean prev, next;
 
 	private int total;
+	private int pageNum;
+	private int amount;
 	private Criteria cri;
 
 	public PagenationDTO(Criteria cri, int total) {
