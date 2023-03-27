@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.servlet.Filter;
+import javax.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -33,15 +34,28 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests().antMatchers("/login").permitAll();
         http.authorizeRequests().antMatchers("/error/**").permitAll();
+        http.authorizeRequests().antMatchers("/register/**").permitAll();
+        http.authorizeRequests().antMatchers("/check/**").permitAll();
+
         http.authorizeRequests().antMatchers("/member/**").access("ROLE_MEMBER");
         http.authorizeRequests().antMatchers("/crew/**").access("ROLE_CREW");
         http.authorizeRequests().antMatchers("/admin/**").access("ROLE_ADMIN");
+
+        // 임시
+        http.authorizeRequests().antMatchers("/reservations/**").permitAll();
+        http.authorizeRequests().antMatchers("/info/**").permitAll();
+        http.authorizeRequests().antMatchers("/payment/**").permitAll();
 
         http.authorizeRequests().antMatchers("/**")// 모든 요청
                 .hasIpAddress("127.0.0.1")
                 .and()
                 .addFilter(getAuthenticationFilter()); // 로그인을 거쳐야 함
 
+        http.logout()
+            .invalidateHttpSession(true)
+            .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
+                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+            });
 
     }
 

@@ -2,7 +2,7 @@ package com.meta.overwash.filter;
 
 
 import com.meta.overwash.domain.UserDTO;
-import com.meta.overwash.errorhandler.ForbiddenException;
+//import com.meta.overwash.errorhandler.ForbiddenException;
 import com.meta.overwash.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -69,9 +69,9 @@ public class MyFilter implements Filter {
 
         }
         if(request.getRequestURI().contains(""))
-        if(check){
-            throw new ForbiddenException("접근 권한이 없습니다.");
-        }
+//        if(check){
+//            throw new ForbiddenException("접근 권한이 없습니다.");
+//        }
 
         chain.doFilter(request2, response2);
 

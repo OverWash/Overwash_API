@@ -32,14 +32,13 @@ public interface PaymentRequestMapper {
 	public PaymentRequestDTO getPaymentRequest(Long prId);
 
 	// 고객의 결제요청 갯수 페이징처리용
-	public Long getCountToMember(UserDTO user);
+	public Long getCountToMember(Long userId);
 
 	// 고객의 결제요청 리스트(페이징)
 	public List<PaymentRequestDTO> getListToMember(HashMap<String, Object> hashMap);
 
 	//  not 페이징
 	public List<PaymentRequestDTO> getPrListToMemberNotPaging(Long userId);
-
 
 	// 	not 페이징
 	public List<PaymentRequestDTO> getListToMemberNotPaging(Long userId);

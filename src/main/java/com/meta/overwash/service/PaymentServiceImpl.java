@@ -75,53 +75,47 @@ public class PaymentServiceImpl implements PaymentService {
 		return map;
 	}
 
-//	// Rest Controller Paging 고객 내역
-//	@Override
-//	public Map<String, Object> getListToMember(Criteria cri, Long userId) {
-//		// Mapper에 들어갈 파라미터 map으로 변환
-//		HashMap<String, Object> vo = new HashMap<String, Object>();
-//		vo.put("pageNum", cri.getPageNum());
-//		vo.put("amount", cri.getAmount());
-//		vo.put("userId", userId);
-//
-//		// 페이징 처리를 위해 map으로 데이터 리턴
-//		Map<String, Object> map = new HashMap<String, Object>();
-//		map.put("paymentPaging", new PagenationDTO(cri, getCountToMember(userId, cri).intValue()));
-//		map.put("paymentRequests", prMapper.getListToMember(vo));
-//		return map;
-//	}
+	// Rest Controller Paging 고객 내역
+	@Override
+	public Map<String, Object> getListToMember(Criteria cri, Long userId) {
+		// Mapper에 들어갈 파라미터 map으로 변환
+		HashMap<String, Object> vo = new HashMap<String, Object>();
+		vo.put("pageNum", cri.getPageNum());
+		vo.put("amount", cri.getAmount());
+		vo.put("userId", userId);
+
+		// 페이징 처리를 위해 map으로 데이터 리턴
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("paymentPaging", new PagenationDTO(cri, getCountToMember(userId).intValue()));
+		map.put("paymentRequests", prMapper.getListToMember(vo));
+		return map;
+	}
 
 	@Override
 	public List<PaymentRequestDTO> getPrListToMember(Long userId) {
 		return prMapper.getPrListToMemberNotPaging(userId);
 	}
 
-	@Override
-	public List<PaymentRequestDTO> getListToMember(Long userId){
-			return prMapper.getListToMemberNotPaging(userId);
-	}
+//	@Override
+//	public List<PaymentRequestDTO> getListToMember(Long userId){
+//			return prMapper.getListToMemberNotPaging(userId);
+//	}
 
+	// prid의 결제요청서 조회
 	@Override
 	public PaymentRequestDTO get(Long pno) {
 		return prMapper.getPaymentRequest(pno);
 	}
 
-	// 고객
-	/*-
-	 * 결제 진행 시 어떤 건에 대해 결제를 진행할 지
-	 * 정보가 있어야 하기 때문에 파라미터로 결제요청 번호를 받음
-	 * 또, 결제 방식에 대한 정보를 받아야 해서
-	 *
-	 * */
 	@Override
 	@Transactional
-	public void paymentProcess(Long prId, Long confirmId, ReceiptDTO receipt) {
+	public void paymentProcess(Long prId, ReceiptDTO receipt) {
 
 		// 영수증 발급 후 예약의 예약상태 '결제완료'로 변경
 		// 결제를 진행할때는 결제요청서를 가지고 있음. 결제요청서에는 예약확정번호가 있고 거기엔 예약번호가 있다.
 
 		PaymentRequestDTO pr = prMapper.getPaymentRequest(prId);
-		ReservationConfirmedDTO rc = rcMapper.getReservationConfirm(confirmId);
+		ReservationConfirmedDTO rc = rcMapper.getReservationConfirm(pr.getConfirm().getConfirmId());
 		ReservationDTO r = rc.getReservation();
 		r.setReservationStatus("결제완료");
 		receipt.setPr(pr);
@@ -150,5 +144,9 @@ public class PaymentServiceImpl implements PaymentService {
 	private Long getCountToAdmin(Criteria cri) {
 
 		return prMapper.getCountToAdmin(cri);
+	}
+
+	private Long getCountToMember(Long userId) {
+		return prMapper.getCountToMember(userId);
 	}
 }
