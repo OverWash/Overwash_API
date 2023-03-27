@@ -64,7 +64,7 @@ public class ReservationConfirmedServiceImpl implements ReservationConfirmedServ
 		vo.put("amount", cri.getAmount());
 
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("reservationConfirmedPaging", new PagenationDTO(cri, rcMapper.getCount(new UserDTO())));
+		map.put("reservationConfirmedPaging", new PagenationDTO(cri, rcMapper.getCount(new UserDTO()).intValue()));
 		map.put("reservationConfirmeds", rcMapper.getList(vo));
 		return map;
 	}
@@ -75,7 +75,7 @@ public class ReservationConfirmedServiceImpl implements ReservationConfirmedServ
 	public Map<String,Object> getListToPaymentCompleteList(Criteria cri) {
 		List<ReservationConfirmedDTO> paymentCompletes = rcMapper.getListByPaymentComplete(cri);
 		cri.setType("결제완료");
-		PagenationDTO pages =new PagenationDTO(cri,rcMapper.getCountKeyword(cri));
+		PagenationDTO pages =new PagenationDTO(cri,rcMapper.getCountKeyword(cri).intValue());
 		Map<String,Object> map = new HashMap<>();
 		map.put("paymentCompletes" , paymentCompletes);
 		map.put("paging",pages);
