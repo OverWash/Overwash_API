@@ -16,6 +16,7 @@ import java.util.List;
 
 @RequestMapping("/reservations/")
 @RestController
+//@CrossOrigin(origins = "*")
 public class ReservationRestController {
     @Autowired
     private ReservationService reservationService;
@@ -29,7 +30,6 @@ public class ReservationRestController {
     ) throws Exception {
         UserDTO user = new UserDTO();
         user.setUserId(userId);
-        System.out.println("{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{"+user);
         MemberDTO member = memberService.getMember(user.getUserId());
         List<ReservationDTO> reservations = reservationService.getListByMember(member.getMemberId());
 
@@ -48,8 +48,6 @@ public class ReservationRestController {
     }
 
 
-//    @RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
-//            method = RequestMethod.DELETE, value = "{reservationId}")
     @DeleteMapping(value="{reservationId}", produces = "application/hal+json; charset=UTF-8")
     public ResponseEntity<String> removeReservation(
             @PathVariable("reservationId") Long reservationId) {
