@@ -21,7 +21,7 @@ public interface ReservationMapper {
 
 	public List<ReservationDTO> getListByMember(HashMap<String, Object> map);
 
-	public int updateReservation(ReservationDTO reservation);
+	public int updateReservationRequest(ReservationDTO reservation);
 
 	public int deleteReservation(Long reservationId);	
 	
@@ -33,7 +33,7 @@ public interface ReservationMapper {
 
 	// 고객의 예약 갯수 (페이징처리용)
 	public Long getCountToMember(Long memberId);
-	
+
 }  
 
 

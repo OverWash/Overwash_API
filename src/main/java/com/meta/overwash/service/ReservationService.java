@@ -26,5 +26,10 @@ public interface ReservationService {
 	// 세탁 완료에 추가 ?
 	public void insertWashingComplete(WashingCompleteDTO washComplete);
 
+	// 주문접수상태 예약건 삭제
+	public boolean removeReservation(Long reservationId);
+
+	// 주문접수상태 예약건 요청사항수정
+	public boolean updateReservationRequest(ReservationDTO reservation);
 
 }
