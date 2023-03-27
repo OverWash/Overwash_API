@@ -33,8 +33,7 @@ public class CrewServiceImpl implements CrewService {
 	@Transactional
 	public void insert(UserDTO user, CrewDTO crew) throws Exception {
 
-		user.setRole("ROLE_CREW");
-
+//		user.setRole("ROLE_CREW");
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		userMapper.insertUser(user);
 

@@ -1,8 +1,10 @@
 package com.meta.overwash.mapper;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.meta.overwash.domain.ReservationDTO;
+import com.meta.overwash.domain.UserDTO;
 import com.meta.overwash.domain.WashingCompleteDTO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -17,7 +19,7 @@ public interface ReservationMapper {
 
 	public void insertReservation(ReservationDTO reservation);
 
-	public List<ReservationDTO> getListByMember(Long memberId);
+	public List<ReservationDTO> getListByMember(HashMap<String, Object> map);
 
 	public int updateReservation(ReservationDTO reservation);
 
@@ -28,6 +30,9 @@ public interface ReservationMapper {
 	public int updateReservationStatus(ReservationDTO reservation);
 		 
 	public ReservationDTO getReservation(Long reservationId);
+
+	// 고객의 예약 갯수 (페이징처리용)
+	public Long getCountToMember(Long memberId);
 	
 }  
 

@@ -72,9 +72,14 @@ public class ReservationConfirmedServiceImpl implements ReservationConfirmedServ
 
 	// 결제완료내역을 가져오는 리스트
 	@Override
-	public List<ReservationConfirmedDTO> getListToPaymentCompleteList() {
-
-		return rcMapper.getListByPaymentComplete();
+	public Map<String,Object> getListToPaymentCompleteList(Criteria cri) {
+		List<ReservationConfirmedDTO> paymentCompletes = rcMapper.getListByPaymentComplete(cri);
+		cri.setType("결제완료");
+		PagenationDTO pages =new PagenationDTO(cri,rcMapper.getCountKeyword(cri).intValue());
+		Map<String,Object> map = new HashMap<>();
+		map.put("paymentCompletes" , paymentCompletes);
+		map.put("paging",pages);
+		return map;
 
 	}
 

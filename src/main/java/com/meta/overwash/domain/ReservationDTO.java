@@ -15,10 +15,10 @@ public class ReservationDTO {
 
 	private Long reservationId;
 	@DateTimeFormat(pattern = "yyyy-MM-dd" )
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date collectDate;
 	@DateTimeFormat(pattern = "yyyy-MM-dd" )
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date reservationDate;
 	private String request;
 	private String reservationStatus;

@@ -56,7 +56,7 @@
 		INSERT INTO payment_request(pr_id,pr_price,confirm_id) VALUES ( #{prId}, #{prPrice}, #{confirm.confirmId})
 	</insert>
 
-	<select id="getPaymentRequest" resultType="PaymentRequestDTO">
+	<select id="getPaymentRequest" resultMap="PrMap">
 		SELECT
 		m.member_id, member_address,member_contact,nickname,
 		r.reservation_id,collect_date,reservation_date,request,reservation_status,
@@ -139,50 +139,56 @@
 
 	<select id="getListToMember" resultMap="PrMap" parameterType="HashMap">
 		<![CDATA[
-		SELECT 				  
-							   member_address,
-							   member_contact,
-							   nickname,
-							   collect_date,
-							   reservation_date,
-							   reservation_status,
-							   confirm_date,
-							   crew_contact,
-							   crew_name,
-							   pr_price
-      	 FROM
-					(SELECT 
-							  ROWNUM RN,
-							   member_address, 
-							   member_contact,
-							   nickname,
-							   collect_date,
-							   reservation_date,
-							   reservation_status,
-							   confirm_date,
-							   crew_contact,
-							   crew_name,
-							   pr_price
-					FROM
-							MEMBER M
-					JOIN 
-							RESERVATION R ON M.MEMBER_ID = R.MEMBER_ID
-					JOIN 
-							RESERVATION_CONFIRMED RC ON R.RESERVATION_ID = RC.RESERVATION_ID
-					JOIN 
-							PAYMENT_REQUEST PR ON PR.CONFIRM_ID = RC.CONFIRM_ID
-					JOIN
-							CREW C ON C.CREW_ID = RC.CREW_ID
-					JOIN
-							LAUNDRY_FACTORY F ON F.FACTORY_ID = RC.FACTORY_ID
-					WHERE 
-							ROWNUM < = #{pageNum} * #{amount}
-							AND
-							M.USER_ID = #{userId}
-							AND 
-							RESERVATION_STATUS LIKE '%'||'검수완료'||'%'
-					)
-		WHERE RN > (#{pageNum}-1) * #{amount}
+			SELECT
+				member_address,
+				member_contact,
+				nickname,
+				collect_date,
+				reservation_id,
+				reservation_date,
+				request,
+				reservation_status,
+				confirm_date,
+				crew_contact,
+				crew_name,
+				pr_price,
+				pr_id
+			FROM
+				(SELECT
+					 ROWNUM RN,
+					 member_address,
+					 member_contact,
+					 nickname,
+					 r.reservation_id,
+					 collect_date,
+					 reservation_date,
+					 request,
+					 reservation_status,
+					 confirm_date,
+					 crew_contact,
+					 crew_name,
+					 pr_price,
+					 pr_id
+				 FROM
+					 MEMBER M
+						 JOIN
+					 RESERVATION R ON M.MEMBER_ID = R.MEMBER_ID
+						 JOIN
+					 RESERVATION_CONFIRMED RC ON R.RESERVATION_ID = RC.RESERVATION_ID
+						 JOIN
+					 PAYMENT_REQUEST PR ON PR.CONFIRM_ID = RC.CONFIRM_ID
+						 JOIN
+					 CREW C ON C.CREW_ID = RC.CREW_ID
+						 JOIN
+					 LAUNDRY_FACTORY F ON F.FACTORY_ID = RC.FACTORY_ID
+				 WHERE
+					 ROWNUM < = #{pageNum} * #{amount}
+				   AND
+					 M.USER_ID = #{userId}
+				   AND
+					 RESERVATION_STATUS LIKE '%'||'검수완료'||'%'
+				)
+			WHERE RN > (#{pageNum}-1) * #{amount}
 	]]>
 	</select>
 	
