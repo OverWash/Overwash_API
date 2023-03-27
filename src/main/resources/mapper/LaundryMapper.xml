@@ -22,6 +22,25 @@
 		]]>
 	</select>
 
+	<select id="getListPaging" resultMap="LaundryMap">
+		<![CDATA[
+			SELECT	name, price, type, laundry_id, price_id
+			FROM
+				(
+					SELECT
+						ROWNUM RN,
+						l.name, lp.price , l.type, l.laundry_id, lp.price_id
+					FROM
+						Laundry l
+							JOIN LAUNDRY_PRICE lp
+								 ON l.price_id = lp.price_id
+					WHERE
+						ROWNUM < = #{pageNum} * #{amount}
+				)
+			WHERE RN > (#{pageNum}-1) * #{amount}
+		]]>
+	</select>
+
 	<select resultType="Long" id="getLaundryCnt">
 		SELECT COUNT(*) FROM LAUNDRY
 	</select>

@@ -134,6 +134,20 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
+	public Map<String, Object> getReceiptListPaging(Criteria cri, Long userId) {
+		// Mapper에 들어갈 파라미터 map으로 변환
+		HashMap<String, Object> vo = new HashMap<String, Object>();
+		vo.put("pageNum", cri.getPageNum());
+		vo.put("amount", cri.getAmount());
+		vo.put("userId", userId);
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("receiptPaging", new PagenationDTO(cri, getCountReceipt(userId)));
+		map.put("receipts", receiptMapper.getReceiptListPaging(vo));
+		return map;
+	}
+
+	@Override
 	public List<ReceiptDTO> getDeliveryCompletedList(Long userId) {
 		return receiptMapper.getDeliveryCompletedList(userId);
 	}
@@ -148,4 +162,6 @@ public class PaymentServiceImpl implements PaymentService {
 	private int getCountToMember(Long userId) {
 		return prMapper.getCountToMember(userId).intValue();
 	}
+
+	private int getCountReceipt(Long userId) { return receiptMapper.getCountReceipt(userId).intValue(); }
 }

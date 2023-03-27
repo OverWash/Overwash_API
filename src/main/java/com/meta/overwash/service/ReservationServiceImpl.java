@@ -67,15 +67,15 @@ public class ReservationServiceImpl implements ReservationService{
 		vo.put("memberId", memberId);
 
 		Map<String, Object> map = new HashMap<>();
-		map.put("reservationPaging", new PagenationDTO(cri, getCountToMember(memberId).intValue()));
+		map.put("reservationPaging", new PagenationDTO(cri, getCountToMember(memberId)));
 		map.put("reservations", mapper.getListByMember(vo));
 		return map;
 	}
 
 	/* ------------------- paging 메소드 ------------------  */
 
-	private Long getCountToMember(Long memberId) {
-		return mapper.getCountToMember(memberId);
+	private int getCountToMember(Long memberId) {
+		return mapper.getCountToMember(memberId).intValue();
 	}
 
 	@Override
