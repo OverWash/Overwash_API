@@ -35,13 +35,6 @@ public class MyFilter implements Filter {
         this.userService = userService;
     }
 
-    ;
-
-    MyFilter(Environment env) {
-        this.env = env;
-
-    }
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws IOException, ServletException {
@@ -56,13 +49,17 @@ public class MyFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    /*
+        jwt에서 role을 가져와
+        UsernamePasswordAuthenticationTokensecurity 에서 권한 처리 리턴
+     */
+    private Authentication getAuthentication(String token) {
 
-    public Authentication getAuthentication(String token) {
-        Claims claims = parseClaims(token);
+        Claims claims = parseClaims(token); // 토큰 복호화
         UserDTO user = new UserDTO();
-        String role= claims.get("auth").toString();
+        String role= claims.get("auth").toString(); // auth에 관련된 내용 가져옴
 
-        Collection<? extends GrantedAuthority> authorities =
+        Collection<? extends GrantedAuthority> authorities = // 권한을 Collection<GrantedAuthority> 로 변환
                 Arrays.stream(role.split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
@@ -73,7 +70,7 @@ public class MyFilter implements Filter {
         return new UsernamePasswordAuthenticationToken(principal,"",authorities);
     }
 
-    public String getToken(HttpServletRequest request) {
+    private String getToken(HttpServletRequest request) {
         //Request header에서 AUTHORIZATION 가져옴
         String authorizationHeader = request.getHeader("AUTHORIZATION");
         // Bearer+" " 를 제외하고 jwt 토큰을 리턴
