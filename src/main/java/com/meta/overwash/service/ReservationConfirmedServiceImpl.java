@@ -33,11 +33,10 @@ public class ReservationConfirmedServiceImpl implements ReservationConfirmedServ
 	@Transactional
 	// 크루가 수거하기 버튼 클릭 시 동작하는 서비스
 	public ReservationConfirmedDTO insertReservationConfirmed(Long reservationId, CrewDTO crew) {
-		System.out.println(crew);
 		ReservationConfirmedDTO rcDto = new ReservationConfirmedDTO();
 		rcDto.setCrew(crew);
 		rcDto.setReservation(resMapper.getReservation(reservationId));
-		System.out.println(rcDto);
+
 		String memberAddress = rcDto.getReservation().getMember().getMemberAddress().split(" ")[1];
 
 		LaundryFactoryDTO factory = new LaundryFactoryDTO();

@@ -7,6 +7,7 @@ import com.meta.overwash.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,14 +20,14 @@ public class MemberController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{userId}/modify")
-    public MemberDTO modify(@PathVariable Long userId) throws Exception {
-        MemberDTO member = memberService.getMember(userId);
-        System.out.println(member + "22222222222222222222222222");
-        return member;  // 여기서 리턴을 못함
+    @GetMapping("/modify")
+    public MemberDTO modify(@AuthenticationPrincipal UserDTO user) throws Exception {
+        MemberDTO member = memberService.getMember(user.getUserId());
+        member.setUser(user);
+        return member;
     }
 
-    @PatchMapping("/modify") // 여기도 밑에처럼 @PathVariable 없애고 crew로 한번에 받음
+    @PatchMapping("/modify") // 여기도 밑에처럼 @PathVariable 없애고 member로 한번에 받음
     public ResponseEntity<String> modify(@RequestBody MemberDTO member) throws Exception {
         return memberService.modify(member.getUser(), member) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
@@ -39,9 +40,9 @@ public class MemberController {
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
     }
 
-    @PatchMapping("/{userId}/remove")
-    public ResponseEntity<String> remove(@PathVariable Long userId) throws Exception {
-        return userService.remove(userId) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
+    @PatchMapping("/remove")
+    public ResponseEntity<String> remove(@AuthenticationPrincipal UserDTO user) throws Exception {
+        return userService.remove(user.getUserId()) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
     }
 

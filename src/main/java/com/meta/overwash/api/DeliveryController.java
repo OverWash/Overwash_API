@@ -3,6 +3,7 @@ package com.meta.overwash.api;
 import com.meta.overwash.domain.*;
 import com.meta.overwash.service.CrewService;
 import com.meta.overwash.service.ReservationConfirmedService;
+import com.meta.overwash.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,10 @@ public class DeliveryController {
     @Autowired
     private ReservationConfirmedService rcService;
 
-    @GetMapping("/pickup-list")
+    @Autowired
+    private UserService userService;
+
+    @PostMapping("/pickup-list")
     public ResponseEntity<Object> pickupList(@RequestBody Criteria cri) throws Exception{
 
         Map<String, Object> response = new HashMap<>();
@@ -38,34 +42,32 @@ public class DeliveryController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/to-be")
+    @PostMapping("/to-be")
     public ResponseEntity<Object> toBeDeliveryList(@RequestBody Criteria cri) throws Exception {
 
         Map<String, Object> response = new HashMap<>();
         int total = crewService.getTotalToBeDelivery(cri);
 
-        response.put("toBeDeliveryList", crewService.getWcListWithPaging(cri));
+        response.put("wcList", crewService.getWcListWithPaging(cri));
         response.put("pageMaker", new PagenationDTO(cri, total));
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/in-process")
+    @PostMapping("/in-process")
     public ResponseEntity<Object> inProcessDeliveryList(@RequestBody Criteria cri, @AuthenticationPrincipal UserDTO user) throws Exception {
-//        UserDTO user = (UserDTO) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println(user + "21111111111111111111111111111111111111111111111111111111111111111");
         CrewDTO crew = crewService.getCrew(user.getUserId());
 
         Map<String, Object> response = new HashMap<>();
         int total = crewService.getDeliveryList(crew.getCrewId(), "배달중").size();
 
-        response.put("DeliveringList", crewService.getDeliveryListWithPaging(crew.getCrewId(), "배달중", cri));
+        response.put("deliveringList", crewService.getDeliveryListWithPaging(crew.getCrewId(), "배달중", cri));
         response.put("pageMaker", new PagenationDTO(cri, total));
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
-    @GetMapping("/completed")
+    @PostMapping("/completed")
     public ResponseEntity<Object> completedDeliveryList(@RequestBody Criteria cri, @AuthenticationPrincipal UserDTO user) throws Exception {
         CrewDTO crew = crewService.getCrew(user.getUserId());
 
@@ -79,25 +81,28 @@ public class DeliveryController {
     }
 
     @PostMapping("/collect/{rid}")
-    public ResponseEntity<String> collect(@PathVariable Long rid, @RequestBody CrewDTO crew) throws  Exception {
+    public ResponseEntity<String> collect(@PathVariable Long rid, @AuthenticationPrincipal UserDTO user) throws  Exception {
+        CrewDTO crew = crewService.getCrew(user.getUserId());
+        crew.setUser(userService.getUserById(user.getUserId()));
+
 
         return rcService.insertReservationConfirmed(rid, crew) != null ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
 
-        //return ResponseEntity.status(HttpStatus.OK).build(); // String flag를 뻇음. front에서 redirect 시켜야할듯
     }
 
-    @PostMapping("/process/{rid}")
-    public ResponseEntity<String> process(@PathVariable Long rid, @RequestBody Map<String, Long> idMap) throws Exception{
+    @PostMapping("/process/{rid}/{wcid}")
+    public ResponseEntity<String> process(@PathVariable Long rid, @PathVariable Long wcid,
+                                            @AuthenticationPrincipal UserDTO user) throws Exception{
 
-        CrewDTO crewDTO = new CrewDTO();
-        crewDTO.setCrewId(idMap.get("crewId"));
+        CrewDTO crew = crewService.getCrew(user.getUserId());
+        crew.setUser(userService.getUserById(user.getUserId()));
 
         WashingCompleteDTO washingCompleteDTO = new WashingCompleteDTO();
-        washingCompleteDTO.setWcId(idMap.get("wcId"));
+        washingCompleteDTO.setWcId(wcid);
 
         DeliveryDTO deliveryDTO = new DeliveryDTO();
-        deliveryDTO.setCrew(crewDTO);
+        deliveryDTO.setCrew(crew);
         deliveryDTO.setWc(washingCompleteDTO);
 
         return crewService.updateDelivering(rid, deliveryDTO) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
@@ -105,9 +110,9 @@ public class DeliveryController {
         // String flag를 뻇음. front에서 redirect 시켜야할듯
     }
 
-    @PostMapping("/completed/{rid}")
-    public ResponseEntity<String> completed(@PathVariable Long rid, @RequestBody Map<String, Long> idMap) throws  Exception{
-        return crewService.updateResDoneDelivery(rid, idMap.get("deliveryId")) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
+    @PostMapping("/completed/{rid}/{deliveryid}")
+    public ResponseEntity<String> completed(@PathVariable Long rid, @PathVariable Long deliveryid) throws  Exception{
+        return crewService.updateResDoneDelivery(rid, deliveryid) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
         // String flag를 뻇음. front에서 redirect 시켜야할듯
     }

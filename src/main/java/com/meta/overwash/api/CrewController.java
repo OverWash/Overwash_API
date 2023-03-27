@@ -25,12 +25,12 @@ public class CrewController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/pickup-list-limit")
+    @PostMapping("/pickup-list-limit")
     public List<ReservationDTO> pickupListLimit(@RequestBody Criteria cri) throws Exception {
         return crewService.getToBeCollectListWithPaging(cri);
     }
 
-    @GetMapping("/to-be-limit")
+    @PostMapping("/to-be-limit")
     public List<WashingCompleteDTO> toBeDeliveryListLimit(@RequestBody Criteria cri) throws Exception {
         return crewService.getWcListWithPaging(cri);
     }
@@ -47,17 +47,22 @@ public class CrewController {
         return crewService.getDeliveryList(crew.getCrewId(), "배달완료").size();
     }
 
-    @GetMapping("/{userId}/modify")
-    public CrewDTO modify(@PathVariable Long userId) throws Exception {
-        CrewDTO crew = crewService.getCrew(userId);
-        System.out.println(crew + " 22222222222222222222222222222222");
-        return crew;        // 여기서 리턴을 못함
+    @GetMapping("/modify")
+    public CrewDTO modify(@AuthenticationPrincipal UserDTO user) throws Exception {
+        CrewDTO crew = crewService.getCrew(user.getUserId());
+        crew.setUser(user);
+        return crew;
     }
 
     @PatchMapping("/modify") // 여기도 밑에처럼 @PathVariable 없애고 crew로 한번에 받음
     public ResponseEntity<String> modify(@RequestBody CrewDTO crew) throws Exception {
         return crewService.modify(crew.getUser(), crew) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
+    }
+
+    @GetMapping("/crew-name")
+    public String crewName(@AuthenticationPrincipal UserDTO user) throws Exception {
+        return crewService.getCrewName(user.getUserId());
     }
 
     // 비밀번호 비교를 위해 user 객체가 필요함. @PathVariable과 @RequestBody로 따로 안받고 @RequestBody로 한번에 받음
@@ -67,9 +72,9 @@ public class CrewController {
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
     }
 
-    @PatchMapping("/{userId}/remove")
-    public ResponseEntity<String> remove(@PathVariable Long userId) throws Exception {
-        return userService.remove(userId) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
+    @PatchMapping("/remove")
+    public ResponseEntity<String> remove(@AuthenticationPrincipal UserDTO user) throws Exception {
+        return userService.remove(user.getUserId()) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
     }
 }
