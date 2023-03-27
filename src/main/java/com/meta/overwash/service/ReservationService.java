@@ -1,7 +1,9 @@
 package com.meta.overwash.service;
 
 import java.util.List;
+import java.util.Map;
 
+import com.meta.overwash.domain.Criteria;
 import com.meta.overwash.domain.ReservationDTO;
 import com.meta.overwash.domain.WashingCompleteDTO;
 
@@ -13,7 +15,7 @@ public interface ReservationService {
 
 	public ReservationDTO getListEachOne(ReservationDTO reservation);
 
-	public List<ReservationDTO> getListByMember(Long memberId);
+	public Map<String, Object> getListByMember(Criteria cri, Long memberId);
 
 	// 예약 신청
 	public void insert(ReservationDTO reservation);

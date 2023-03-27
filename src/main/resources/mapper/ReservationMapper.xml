@@ -105,20 +105,25 @@
                 r.reservation_id = #{reservationId}
 	</select>
 
-	<select id="getListByMember" resultMap="reservationMap">
+	<select id="getListByMember" resultMap="reservationMap" parameterType="HashMap">
 		<![CDATA[
-			SELECT DISTINCT r.reservation_id, r.collect_date, r.reservation_date, r.request, 
-		  		r.reservation_status
-		  	FROM
-		  		reservation r
-		  	WHERE
-		  		r.reservation_id > 0
+			SELECT
+				reservation_id, collect_date, reservation_date, request,
+				reservation_status
+			FROM
+				(
+					SELECT
+						ROWNUM RN,
+						r.*
+					FROM
+						RESERVATION r
+					WHERE
+						ROWNUM < = #{pageNum} * #{amount}
+					  AND
+						member_id = #{memberId}
+				)
+			WHERE RN > (#{pageNum}-1) * #{amount}
 		]]>
-            AND
-                r.member_id = #{memberId}
-            ORDER BY
-				r.reservation_date DESC
-                
 	</select>
 
 
@@ -174,6 +179,17 @@
 		 JOIN MEMBER M
 		   ON R.MEMBER_ID = M.MEMBER_ID
 	WHERE RESERVATION_ID = #{reservationId}
+	</select>
+	
+	<select id="getCountToMember" resultType="Long">
+		SELECT
+			COUNT(*)
+		FROM
+			RESERVATION r
+				JOIN
+			MEMBER m ON m.MEMBER_ID = r.MEMBER_ID
+		WHERE
+			m.member_id = #{memberId}
 	</select>
 
 	<update id="updateReservationRequest" parameterType="ReservationDTO">

@@ -40,7 +40,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         try {
             // 로그인 요청 시 넘어오는 객체
             UserDTO user = new ObjectMapper().readValue(request.getInputStream(), UserDTO.class);
-            //여기까지는 넘어옴
 
             return getAuthenticationManager().authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), new ArrayList<>()));
         } catch (IOException e) {
@@ -58,15 +57,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         String token = Jwts.builder()
                 .setSubject(userDetail.getEmail())
-                .claim("auth",userDetail.getRole())
+                .claim("auth", userDetail.getRole())
                 .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact();
 
-        response.addHeader("role",userDetail.getRole());
-        Cookie cookie = new Cookie("token",token);
-
-        response.addCookie(cookie);
+        response.addHeader("role", userDetail.getRole());
+        response.addHeader("token", token);
+        response.addHeader("userid", userDetail.getUserId() + "");
     }
+
 }
