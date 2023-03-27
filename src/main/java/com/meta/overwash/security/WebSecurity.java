@@ -30,16 +30,19 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.csrf()
                 .disable()   // csrf 토큰
                 .httpBasic().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests().antMatchers("/login").permitAll()
+                .authorizeRequests()
+                .antMatchers("/login").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
-//                .antMatchers("/admin/1").access("ROLE_ADMIN")
                 .antMatchers("/member/**").hasRole("MEMBER")
                 .antMatchers("/**").permitAll()// 모든 요청
                 .and()
                 .addFilter(getAuthenticationFilter())
-                .addFilterAfter(new MyFilter(env,userService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new MyFilter(env,userService)
+                        , UsernamePasswordAuthenticationFilter.class) // 로그인 이후
+
 
         ; // 로그인을 거쳐야 함
 
