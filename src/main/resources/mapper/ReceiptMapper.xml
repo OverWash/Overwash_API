@@ -56,6 +56,65 @@
 			member m ON m.member_id = r.member_id
 		WHERE
 			m.user_id = #{userId}
+		  AND
+			r.reservation_status LIKE  '%'||'결제완료'||'%'
+	</select>
+
+	<!-- 영수증 리스트 페이징 -->
+	<select id="getReceiptListPaging" parameterType="HashMap" resultMap="receiptMap">
+		<![CDATA[
+		SELECT
+			receipt_id, payment_method,
+			pr_id, pr_price,
+			reservation_id, reservation_date,
+			confirm_id, confirm_date,
+			crew_contact
+		FROM
+			(
+				SELECT
+					ROWNUM RN,
+					rec.receipt_id, rec.payment_method,
+					p.pr_id, p.pr_price,
+					r.reservation_id, r.reservation_date,
+					rc.confirm_id, rc.confirm_date,
+					c.crew_contact
+				FROM
+					receipt rec
+						JOIN
+					payment_request p ON rec.pr_id = p.pr_id
+						JOIN
+					reservation_confirmed rc ON p.confirm_id = rc.confirm_id
+						JOIN
+					crew c ON rc.crew_id = c.crew_id
+						JOIN
+					reservation r ON r.reservation_id = rc.reservation_id
+						JOIN
+					member m ON m.member_id = r.member_id
+				WHERE
+					ROWNUM < = #{pageNum} * #{amount}
+				  AND
+
+					m.user_id = #{userId}
+				  AND
+					r.reservation_status LIKE  '%'||'결제완료'||'%'
+			)
+		WHERE RN > (#{pageNum}-1) * #{amount}
+		]]>
+	</select>
+
+	<select id="getCountReceipt" resultType="Long">
+		SELECT COUNT(*)
+		FROM RECEIPT rec
+				 JOIN
+			 PAYMENT_REQUEST pr ON rec.pr_id = pr.pr_id
+				 JOIN
+			 RESERVATION_CONFIRMED rc ON pr.confirm_id = rc.confirm_id
+				 JOIN
+			 RESERVATION r ON rc.reservation_id = r.reservation_id
+				 JOIN
+			 MEMBER m ON r.member_id = m.member_id
+		WHERE
+			m.user_id = #{userId}
 	</select>
 	
 	<!-- 회원이 보유한 영수증 중 예약상태가 '배달완료'인 리스트 -->

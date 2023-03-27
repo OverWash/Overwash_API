@@ -31,14 +31,16 @@ public interface PaymentService {
 	// 결제 후 예약테이블의 예약상태를 '결제완료'로 변경	
 	public void paymentProcess(Long prId, ReceiptDTO receipt);
 
+	/* ---------------- 영수증 관련 ----------------- */
 	// 영수증 하나 가져오기
 	public ReceiptDTO getReceipt(Long receiptId);
 
 	// 회원이 보유한 영수증 리스트
 	public List<ReceiptDTO> getReceiptList(Long userId);
 
-//	List<PaymentRequestDTO> getListToMember(Long userId);
-	
+	public Map<String, Object> getReceiptListPaging(Criteria cri, Long userId);
+
+
 	// 회원이 보유한 영수증 중 예약상태가 '배달완료'인 리스트
 	public List<ReceiptDTO> getDeliveryCompletedList(Long userId);
 
