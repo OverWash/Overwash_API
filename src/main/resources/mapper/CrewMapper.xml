@@ -76,9 +76,6 @@
 	
 	<select id="getCrew" parameterType="Long" resultMap="crewMap">
 		select
-			u.user_id	   as user_id,
-			u.email 	   as email,
-			u.password     as password,
 			c.crew_id	   as crew_id,
 			c.crew_contact as crew_contact,
 			c.crew_name	   as crew_name,
@@ -86,8 +83,6 @@
 			c.car_type 	   as car_type,
 			c.car_number   as car_number
 		from crew c
-			 join users u
-			   on c.user_id = u.user_id
 		where
 			c.user_id = #{userId}
 	</select>

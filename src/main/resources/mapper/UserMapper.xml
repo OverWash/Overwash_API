@@ -44,7 +44,7 @@
 	
 	<!-- userId로 user 검색 -->
 	<select id="getUserById" resultType="UserDTO">
-		select * 
+		select user_id, email
 			from users 
 		where
 			user_id = #{userId}

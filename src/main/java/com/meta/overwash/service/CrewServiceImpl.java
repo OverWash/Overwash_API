@@ -24,6 +24,9 @@ public class CrewServiceImpl implements CrewService {
 	private UserMapper userMapper;
 
 	@Autowired
+	private UserService userService;
+
+	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	@Override
@@ -60,6 +63,18 @@ public class CrewServiceImpl implements CrewService {
 	@Override
 	public CrewDTO getCrew(Long userId) throws Exception {
 		return crewMapper.getCrew(userId);
+	}
+
+	@Override
+	public CrewDTO getCrewInfo(Long userId) throws Exception {
+
+		CrewDTO crew = crewMapper.getCrew(userId);
+//		UserDTO user = new UserDTO();
+
+		crew.setUser(userService.getUserById(userId));
+
+
+		return crew;
 	}
 
 	public List<CrewDTO> getCrewList(String role) throws Exception {
