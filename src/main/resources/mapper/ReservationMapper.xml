@@ -105,8 +105,8 @@
                 r.reservation_id = #{reservationId}
 	</select>
 
-	<select id="getListByMember" resultMap="reservationMap" parameterType="HashMap">
-		<![CDATA[
+		<select id="getListByMember" resultMap="reservationMap" parameterType="HashMap">
+			<![CDATA[
 			SELECT
 				reservation_id, collect_date, reservation_date, request,
 				reservation_status
@@ -123,8 +123,9 @@
 						member_id = #{memberId}
 				)
 			WHERE RN > (#{pageNum}-1) * #{amount}
-		]]>
-	</select>
+			]]>
+		</select>
+
 
 
 	<select id="getListCheckComplete" resultMap="reservationMap"

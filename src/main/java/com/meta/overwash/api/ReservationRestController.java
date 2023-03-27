@@ -19,7 +19,7 @@ import java.util.List;
 
 @RequestMapping("/reservations/")
 @RestController
-//@CrossOrigin(origins = "*")
+
 public class ReservationRestController {
     @Autowired
     private ReservationService reservationService;
@@ -27,18 +27,18 @@ public class ReservationRestController {
     private MemberService memberService;
 
 
-    @GetMapping(value = "{userId}", produces = "application/hal+json; charset=UTF-8")
-    public ResponseEntity<List<ReservationDTO>> getListByMember(@PathVariable("userId") Long userId
-            //@AuthenticationPrincipal UserDTO user
-    ) throws Exception {
-        UserDTO user = new UserDTO();
-        user.setUserId(userId);
-        MemberDTO member = memberService.getMember(user.getUserId());
-        List<ReservationDTO> reservations = reservationService.getListByMember(member.getMemberId());
-
-        return new ResponseEntity<>(reservations, HttpStatus.OK);
-
-    }
+//    @GetMapping(value = "{userId}", produces = "application/hal+json; charset=UTF-8")
+//    public ResponseEntity<List<ReservationDTO>> getListByMember(@PathVariable("userId") Long userId
+//            //@AuthenticationPrincipal UserDTO user
+//    ) throws Exception {
+//        UserDTO user = new UserDTO();
+//        user.setUserId(userId);
+//        MemberDTO member = memberService.getMember(user.getUserId());
+//        List<ReservationDTO> reservations = reservationService.getListByMember(member.getMemberId());
+//
+//        return new ResponseEntity<>(reservations, HttpStatus.OK);
+//
+//    }
 
     @PostMapping(value="{userId}", produces = "application/hal+json; charset=UTF-8")
     public void registerReservation(@PathVariable("userId") Long userId,
@@ -72,20 +72,8 @@ public class ReservationRestController {
             : new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    // Auth 가 왜 안될까?
-    //    @GetMapping("/completed")
-//    public List<DeliveryDTO> completedDeliveryList(@AuthenticationPrincipal UserDTO user) throws Exception {
-//        CrewDTO crew = crewService.getCrew(user.getUserId());
-//
-//        return crewService.getDeliveryList(crew.getCrewId(), "배달완료");
-//    }
-//    @GetMapping("/reservations/{userid}")
-//    public List<ReservationDTO> getReservationList(@PathVariable long userid) throws Exception {
-//        MemberDTO member = memberService.getMember(userid);
-//        return reservationService.getListByMember(member.getMemberId());
-//    }
 
-    @GetMapping("/reservations/{userid}")
+    @GetMapping("{userid}")
     public ResponseEntity<Map<String, Object>> reservationList(Criteria cri, @PathVariable long userid,
                                                                @RequestParam(required = false, defaultValue = "1") int page,
                                                                @RequestParam(required = false, defaultValue = "10") int amount) throws Exception {
