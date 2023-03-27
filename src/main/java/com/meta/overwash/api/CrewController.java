@@ -54,6 +54,7 @@ public class CrewController {
         return crew;
     }
 
+    // 아이디 값이 안넘어가고 안넘어오나봄. 자자
     @PatchMapping("/modify") // 여기도 밑에처럼 @PathVariable 없애고 crew로 한번에 받음
     public ResponseEntity<String> modify(@RequestBody CrewDTO crew) throws Exception {
         return crewService.modify(crew.getUser(), crew) == true ? ResponseEntity.status(HttpStatus.OK).body("success")

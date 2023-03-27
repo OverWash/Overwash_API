@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.meta.overwash.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -51,7 +52,9 @@ public class CrewServiceImpl implements CrewService {
 	@Transactional
 	public boolean modify(UserDTO user, CrewDTO crew) throws Exception {
 
-		if (user.getPassword() != null) {
+		System.out.println(user);
+		System.out.println(crew);
+		if (!user.getPassword().equals("")) {
 			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			if(userMapper.updateUser(user) == 0) return false;
 		}
