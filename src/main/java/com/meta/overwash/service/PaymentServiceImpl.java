@@ -85,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 		// 페이징 처리를 위해 map으로 데이터 리턴
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("paymentPaging", new PagenationDTO(cri, getCountToMember(userId).intValue()));
+		map.put("paymentPaging", new PagenationDTO(cri, getCountToMember(userId)));
 		map.put("paymentRequests", prMapper.getListToMember(vo));
 		return map;
 	}
@@ -140,12 +140,12 @@ public class PaymentServiceImpl implements PaymentService {
 
 	/* ------------서비스 내부에서 쓸 메소드 -------------- */
 
-	private Long getCountToAdmin(Criteria cri) {
+	private int getCountToAdmin(Criteria cri) {
 
-		return prMapper.getCountToAdmin(cri);
+		return prMapper.getCountToAdmin(cri).intValue();
 	}
 
-	private Long getCountToMember(Long userId) {
-		return prMapper.getCountToMember(userId);
+	private int getCountToMember(Long userId) {
+		return prMapper.getCountToMember(userId).intValue();
 	}
 }
