@@ -54,7 +54,7 @@ public class CrewServiceImpl implements CrewService {
 
 		System.out.println(user);
 		System.out.println(crew);
-		if (!user.getPassword().equals("")) {
+		if (user.getPassword() != null) {
 			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			if(userMapper.updateUser(user) == 0) return false;
 		}

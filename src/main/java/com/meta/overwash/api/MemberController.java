@@ -28,7 +28,10 @@ public class MemberController {
     }
 
     @PatchMapping("/modify") // 여기도 밑에처럼 @PathVariable 없애고 member로 한번에 받음
-    public ResponseEntity<String> modify(@RequestBody MemberDTO member) throws Exception {
+    public ResponseEntity<String> modify(@AuthenticationPrincipal UserDTO user, @RequestBody MemberDTO member) throws Exception {
+
+        member.getUser().setUserId(user.getUserId());
+
         return memberService.modify(member.getUser(), member) == true ? ResponseEntity.status(HttpStatus.OK).body("success")
                     : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("fail");
     }
