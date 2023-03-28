@@ -52,9 +52,7 @@ public class CrewServiceImpl implements CrewService {
 	@Transactional
 	public boolean modify(UserDTO user, CrewDTO crew) throws Exception {
 
-		System.out.println(user);
-		System.out.println(crew);
-		if (user.getPassword() != null) {
+		if (user.getPassword() != null && user.getPassword().length() != 0) {
 			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			if(userMapper.updateUser(user) == 0) return false;
 		}
