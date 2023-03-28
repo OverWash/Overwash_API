@@ -42,4 +42,31 @@
 		CONFIRM_ID = #{confirmId}
 
 	</select>
+
+	<select id="getListPaging" resultMap="checkMap" parameterType="HashMap">
+		<![CDATA[
+			SELECT
+				name, price
+			FROM
+				(
+					SELECT
+						ROWNUM RN, L.name , LP.PRICE
+					FROM
+						"CHECK" C
+							JOIN
+						LAUNDRY L ON C.LAUNDRY_ID = L.LAUNDRY_ID
+							JOIN
+						LAUNDRY_PRICE LP ON L.PRICE_ID = LP.PRICE_ID
+					WHERE
+						ROWNUM < = #{pageNum} * #{amount}
+					  AND
+						CONFIRM_ID = #{confirmId}
+				)
+			WHERE RN > (#{pageNum}-1) * #{amount}
+		]]>
+	</select>
+
+	<select id="getCountFromCheck" resultType="Long">
+		SELECT COUNT(*) FROM "CHECK" WHERE confirm_id = #{confirmId}
+	</select>
 </mapper>

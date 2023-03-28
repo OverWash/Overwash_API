@@ -67,15 +67,32 @@ public class ReservationServiceImpl implements ReservationService{
 		vo.put("memberId", memberId);
 
 		Map<String, Object> map = new HashMap<>();
-		map.put("reservationPaging", new PagenationDTO(cri, getCountToMember(memberId).intValue()));
+		map.put("reservationPaging", new PagenationDTO(cri, getCountToMember(memberId)));
 		map.put("reservations", mapper.getListByMember(vo));
 		return map;
 	}
 
 	/* ------------------- paging 메소드 ------------------  */
 
-	private Long getCountToMember(Long memberId) {
-		return mapper.getCountToMember(memberId);
+	private int getCountToMember(Long memberId) {
+		return mapper.getCountToMember(memberId).intValue();
 	}
 
+	@Override
+	public boolean removeReservation(Long reservationId) {
+		int result = mapper.deleteReservation(reservationId);
+		if (result == 0) {
+			return false;
+		}
+		return result == 1;
+	}
+
+	@Override
+	public boolean updateReservationRequest(ReservationDTO reservation) {
+		if(mapper.updateReservationRequest(reservation) == 0) {
+			return false;
+		}
+		return mapper.updateReservationRequest(reservation) == 1;
+
+	}
 }

@@ -1,5 +1,6 @@
 package com.meta.overwash.mapper;
 
+import java.util.HashMap;
 import java.util.List;
 import com.meta.overwash.domain.CheckDTO;
 import com.meta.overwash.domain.ReservationConfirmedDTO;
@@ -19,5 +20,9 @@ public interface CheckMapper {
 	public int deleteCheck(Long checkId);
 
 	public List<CheckDTO> getListByConfirmId(ReservationConfirmedDTO rcDto);
+
+	public List<CheckDTO> getListPaging(HashMap<String, Object> hashMap);
+
+	public Long getCountFromCheck(Long confirmId);
 
 }

@@ -18,6 +18,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -38,15 +39,51 @@ public class MyFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
                          FilterChain chain) throws IOException, ServletException {
+        if (checkUrl((HttpServletRequest) request)) {
 
-        String token = getToken((HttpServletRequest) request);
-        if (token != null && isJwtValid(token)) {
-            Authentication authentication = getAuthentication(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else {
-            onError((HttpServletResponse) response, "UNAUTHORIZATION");
+            String token = getToken((HttpServletRequest) request);
+            if (token != null && isJwtValid(token)) {
+                Authentication authentication = getAuthentication(token);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                onError((HttpServletResponse) response, "UNAUTHORIZATION");
+            }
         }
-        chain.doFilter(request, response);
+            chain.doFilter(request, response);
+    }
+
+    private static boolean compareStrings(List<String> arr, String s2) {
+        for (String s1 : arr) {
+            int index1 = s1.lastIndexOf('/');
+            int index2 = s2.lastIndexOf('/');
+
+            if (index1 == -1 || index2 == -1) {
+                if (s1.equals(s2)) {
+                    return false;
+                }
+            } else {
+                String sub1 = s1.substring(0, index1);
+                String sub2 = s2.substring(0, index2);
+
+                if (sub1.equals(sub2)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public boolean checkUrl(HttpServletRequest req) {
+        List<String> uriList = new ArrayList<String>();
+        uriList.add("/check");
+        uriList.add("/check/member/");
+        uriList.add("/check/crew/");
+        uriList.add("/register/");
+
+        String uri = req.getRequestURI();
+        return compareStrings(uriList,uri);
+
     }
 
     /*
@@ -57,7 +94,7 @@ public class MyFilter implements Filter {
 
         Claims claims = parseClaims(token); // 토큰 복호화
         UserDTO user = new UserDTO();
-        String role= claims.get("auth").toString(); // auth에 관련된 내용 가져옴
+        String role = claims.get("auth").toString(); // auth에 관련된 내용 가져옴
 
         Collection<? extends GrantedAuthority> authorities = // 권한을 Collection<GrantedAuthority> 로 변환
                 Arrays.stream(role.split(","))
@@ -68,7 +105,7 @@ public class MyFilter implements Filter {
         user.setEmail(claims.getSubject());
         user.setRole(role);
         UserDetails principal = user;
-        return new UsernamePasswordAuthenticationToken(principal,"",authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
     private String getToken(HttpServletRequest request) {
