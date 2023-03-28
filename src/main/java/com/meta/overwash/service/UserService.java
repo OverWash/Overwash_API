@@ -9,6 +9,8 @@ public interface UserService extends UserDetailsService {
 
     public UserDTO getUserById(Long userId);
 
+    public boolean remove(Long userId);
+
 
 
 }

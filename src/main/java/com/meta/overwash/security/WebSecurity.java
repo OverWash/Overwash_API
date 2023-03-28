@@ -41,8 +41,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers("/check/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/member/**").hasRole("MEMBER")
-//                .antMatchers("/reservations/**").hasRole("MEMBER")
-                .antMatchers("/crew/**").access("ROLE_CREW")
+                .antMatchers("/crew/**").hasRole("CREW")
                 .antMatchers("/**").permitAll()// 모든 요청
                 .and()
                 .addFilter(getAuthenticationFilter())

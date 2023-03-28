@@ -5,16 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
+import com.meta.overwash.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.meta.overwash.domain.CrewDTO;
-import com.meta.overwash.domain.DeliveryDTO;
-import com.meta.overwash.domain.ReservationDTO;
-import com.meta.overwash.domain.UserDTO;
-import com.meta.overwash.domain.WashingCompleteDTO;
 import com.meta.overwash.mapper.CrewMapper;
 import com.meta.overwash.mapper.UserMapper;
 
@@ -26,6 +23,9 @@ public class CrewServiceImpl implements CrewService {
 
 	@Autowired
 	private UserMapper userMapper;
+
+	@Autowired
+	private UserService userService;
 
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -43,15 +43,17 @@ public class CrewServiceImpl implements CrewService {
 		crewMapper.insertCrew(crew);
 	}
 
-	@Override
-	public boolean remove(Long crewId) throws Exception {
-		return crewMapper.deleteCrew(crewId) == 1;
-	}
+//	@Override
+//	public boolean remove(Long crewId) throws Exception {
+//		return crewMapper.deleteCrew(crewId) == 1;
+//	}
 
 	@Override
 	@Transactional
 	public boolean modify(UserDTO user, CrewDTO crew) throws Exception {
 
+		System.out.println(user);
+		System.out.println(crew);
 		if (user.getPassword() != null) {
 			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			if(userMapper.updateUser(user) == 0) return false;
@@ -63,6 +65,23 @@ public class CrewServiceImpl implements CrewService {
 	@Override
 	public CrewDTO getCrew(Long userId) throws Exception {
 		return crewMapper.getCrew(userId);
+	}
+
+	@Override
+	public String getCrewName(Long userId) throws Exception {
+		return crewMapper.selectCrewName(userId);
+	}
+
+	@Override
+	public CrewDTO getCrewInfo(Long userId) throws Exception {
+
+		CrewDTO crew = crewMapper.getCrew(userId);
+//		UserDTO user = new UserDTO();
+
+		crew.setUser(userService.getUserById(userId));
+
+
+		return crew;
 	}
 
 	public List<CrewDTO> getCrewList(String role) throws Exception {
@@ -91,8 +110,28 @@ public class CrewServiceImpl implements CrewService {
 	}
 
 	@Override
+	public List<ReservationDTO> getToBeCollectListLimit() throws Exception {
+		return crewMapper.selectToBeCollectListLimit();
+	}
+
+	@Override
+	public List<ReservationDTO> getToBeCollectListWithPaging(Criteria cri) throws Exception {
+		return crewMapper.selectToBeCollectListWithPaging(cri);
+	}
+
+	@Override
 	public List<WashingCompleteDTO> getWcList() throws Exception {
 		return crewMapper.selectWcList();
+	}
+
+	@Override
+	public List<WashingCompleteDTO> getWcListLimit() throws Exception {
+		return crewMapper.selectWcListLimit();
+	}
+
+	@Override
+	public List<WashingCompleteDTO> getWcListWithPaging(Criteria cri) throws Exception {
+		return crewMapper.selectWcListWithPaging(cri);
 	}
 
 	@Override
@@ -116,10 +155,30 @@ public class CrewServiceImpl implements CrewService {
 		paramMap.put("crewId", crewId);
 		paramMap.put("status", status);
 
-		List<DeliveryDTO> deliveryList = crewMapper.selectDeliveryList(paramMap);
-
-		return deliveryList;
+		return crewMapper.selectDeliveryList(paramMap);
 	}
+
+	@Override
+	public List<DeliveryDTO> getDeliveryListWithPaging(Long crewId, String status, Criteria cri) throws Exception {
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("crewId", crewId);
+		paramMap.put("status", status);
+		paramMap.put("pageNum", cri.getPageNum());
+		paramMap.put("amount", cri.getAmount());
+
+		return crewMapper.selectDeliveryListWithPaging(paramMap);
+	}
+
+	@Override
+	public int getTotalToBeCollect(Criteria cri) throws Exception {
+		return crewMapper.selectTotalToBeCollect(cri);
+	}
+
+	@Override
+	public int getTotalToBeDelivery(Criteria cri) throws Exception {
+		return crewMapper.selectTotalToBeDelivery(cri);
+	}
+
 
 }
 

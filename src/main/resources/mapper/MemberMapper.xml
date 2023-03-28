@@ -31,17 +31,12 @@
 	<!-- userId로 getMember로 수정함 -->
 	<select id="getMember" resultMap="memberInfo">
 		SELECT
-			u.user_id	     as user_id,
-			u.email 	     as email,
-			u.password       as password,
 			m.member_id	     as member_id,
 			m.member_contact as member_contact,
 			m.member_address as member_address,
 			m.nickname 		 as nickname
 		FROM 
 			member m
-		JOIN 
-			users u ON m.user_id = u.user_id
 		WHERE
 			m.user_id = #{userId}
 	</select>

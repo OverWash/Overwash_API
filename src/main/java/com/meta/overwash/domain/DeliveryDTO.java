@@ -21,7 +21,7 @@ public class DeliveryDTO {
 	@DateTimeFormat(pattern = "yyyy-MM-dd" )
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date deliveryDate;
-//	private CrewDTO crew;
+	private CrewDTO crew;
 	private String status;
 	private WashingCompleteDTO wc;
 }

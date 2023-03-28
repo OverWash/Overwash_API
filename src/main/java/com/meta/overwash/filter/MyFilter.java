@@ -101,6 +101,7 @@ public class MyFilter implements Filter {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
+        user.setUserId(Long.parseLong(claims.get("userId").toString()));
         user.setEmail(claims.getSubject());
         user.setRole(role);
         UserDetails principal = user;

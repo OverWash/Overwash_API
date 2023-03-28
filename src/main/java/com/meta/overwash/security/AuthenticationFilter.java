@@ -3,6 +3,7 @@ package com.meta.overwash.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.meta.overwash.domain.UserDTO;
 import com.meta.overwash.service.UserService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.core.env.Environment;
@@ -54,10 +55,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         String username = ((UserDTO) authResult.getPrincipal()).getUsername();
         UserDTO userDetail = userService.getUser(username);
-
+        System.out.println(userDetail);
         String token = Jwts.builder()
                 .setSubject(userDetail.getEmail())
                 .claim("auth", userDetail.getRole())
+                .claim("userId",userDetail.getUserId().toString())
                 .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
