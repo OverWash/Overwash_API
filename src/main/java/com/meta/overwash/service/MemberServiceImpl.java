@@ -49,8 +49,8 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	@Transactional
 	public boolean modify(UserDTO user, MemberDTO member) throws Exception {
-
-		if (user.getPassword() != null) {
+		System.out.println(user.getPassword().length());
+		if (user.getPassword() != null && user.getPassword().length() != 0) {
 			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 			if (userMapper.updateUser(user) == 0)
 				return false;
